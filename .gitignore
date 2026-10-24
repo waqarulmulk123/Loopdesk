@@ -7,6 +7,7 @@ obj/
 .env
 .dev.vars
 .wrangler/
+.cf-build-*/
 node_modules/
 dist/
 artifacts/
