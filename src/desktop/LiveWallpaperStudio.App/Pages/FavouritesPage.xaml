@@ -1,0 +1,18 @@
+<Page
+    x:Class="LiveWallpaperStudio.App.Pages.FavouritesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <Grid.Transitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+            </TransitionCollection>
+        </Grid.Transitions>
+        <StackPanel Spacing="12">
+            <TextBlock Text="Favourites" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" TextWrapping="Wrap" />
+            <Button Content="Refresh favourites" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <ListView ItemsSource="{x:Bind ViewModel.Favourites, Mode=OneWay}" />
+        </StackPanel>
+    </Grid>
+</Page>

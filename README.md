@@ -49,14 +49,27 @@ This workspace runs on Linux, so WinUI 3 and the native Windows renderer cannot 
 - Complete analysis, including research verification: `docs/ANALYSIS.md`
 - Current status, honestly marked: `docs/IMPLEMENTATION_STATUS.md`
 
-## Next step: M0
+## Start local development from the zip
 
-On a Windows development machine with Visual Studio 2026, .NET 10 SDK, Windows SDK and CMake:
-
+1. Extract the zip on a Windows PC (Visual Studio 2026, .NET 10 SDK, Windows SDK, CMake, Node 20+).
+2. Run:
 ```powershell
 .\scripts\bootstrap-windows.ps1
-.\scripts\build-desktop.ps1 -Configuration Debug -Architecture x64
+.\scripts\build-desktop.ps1
 .\scripts\test-all.ps1
 ```
+3. Put a local H.264 MP4 in `%LOCALAPPDATA%\LiveWallpaperStudio\media`, launch the WinUI app, select it in the Local library, and press Apply wallpaper.
+4. Backend (optional, staging only):
+```powershell
+cd src\backend\api
+npm ci
+npm run typecheck
+npm test
+```
+Configure `DATABASE_URL` / Hyperdrive, R2 buckets and Queues from `.env.example` before expecting a real catalog — without them the API honestly returns an empty catalog.
 
-Those scripts are scaffolded in `scripts/` and must be completed and run on Windows during M0 — they are not yet verified here.
+## What is complete, and what is not
+
+Complete in code for local development: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, download manager, cache, IPC validation, SQLite schema), Workers API (real PostgreSQL catalog queries, admin publish/unpublish, public authorised downloads, premium refusal without entitlement), Queues processing contract, FFmpeg job, MSIX manifest template, CI workflow, docs and test plan.
+
+Still P1 / not implemented: WebView2 interactive wallpapers, playlists, premium sync, account favourites, and a signed installer. Still not verified: every Windows build, desktop-attachment, multi-monitor and physical acceptance test in `docs/TEST_PLAN.md` — run those on real Windows before any release claim.

@@ -1,0 +1,47 @@
+name: Desktop build (Windows)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-m0:
+    name: M0 Windows build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build .NET Core library
+        run: dotnet build src/desktop/LiveWallpaperStudio.Core/LiveWallpaperStudio.Core.csproj -c Release
+
+      - name: Build WinUI app (unpackaged, x64)
+        run: dotnet build src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -p:Platform=x64
+
+      - name: Run .NET tests
+        run: dotnet run --project tests/Core.Tests/Core.Tests.csproj -c Release
+
+      - name: Configure native renderer (CMake)
+        run: cmake -S src/renderer -B build/renderer -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build native renderer
+        run: cmake --build build/renderer --config Release
+
+      - name: Run native renderer (M0 startup proof)
+        run: .\build\renderer\Release\lws-renderer.exe
+
+      - name: Upload renderer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lws-renderer-windows-x64
+          path: build/renderer/Release/lws-renderer.exe
+          if-no-files-found: error

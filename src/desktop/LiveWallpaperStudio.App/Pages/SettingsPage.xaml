@@ -1,0 +1,27 @@
+<Page
+    x:Class="LiveWallpaperStudio.App.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <Grid.Transitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+            </TransitionCollection>
+        </Grid.Transitions>
+        <ScrollViewer>
+            <StackPanel Spacing="12">
+                <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+                <ToggleSwitch Header="Muted" IsOn="{x:Bind ViewModel.Muted, Mode=TwoWay}" />
+                <ToggleSwitch Header="Pause on fullscreen" IsOn="{x:Bind ViewModel.PauseOnFullscreen, Mode=TwoWay}" />
+                <ToggleSwitch Header="Pause on lock" IsOn="{x:Bind ViewModel.PauseOnLock, Mode=TwoWay}" />
+                <ToggleSwitch Header="Pause on display off" IsOn="{x:Bind ViewModel.PauseOnDisplayOff, Mode=TwoWay}" />
+                <ToggleSwitch Header="Pause on Battery Saver" IsOn="{x:Bind ViewModel.PauseOnBatterySaver, Mode=TwoWay}" />
+                <ToggleSwitch Header="Send usage analytics (off by default)" IsOn="{x:Bind ViewModel.SendUsageAnalytics, Mode=TwoWay}" />
+                <ToggleSwitch Header="Send crash reports (off by default)" IsOn="{x:Bind ViewModel.SendCrashReports, Mode=TwoWay}" />
+                <TextBox Header="Online API base URL (leave empty for offline mode)" Text="{x:Bind ViewModel.ApiBaseUrl, Mode=TwoWay}" PlaceholderText="https://api.example.com" />
+                <Button Content="Save settings" Command="{x:Bind ViewModel.SaveCommand}" />
+                <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

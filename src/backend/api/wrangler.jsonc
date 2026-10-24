@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "name": "live-wallpaper-studio-api",
+  "queues": { "producers": [{ "binding": "INGEST_QUEUE", "queue": "live-wallpaper-media-ingest" }] },
+  "r2_buckets": [
+    { "binding": "R2_INGEST", "bucket_name": "live-wallpaper-ingest-private" },
+    { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published" }
+  ],
+  "vars": {
+    "WORKER_ENVIRONMENT": "development"
+  },
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "env": {
+    "staging": {
+      "name": "live-wallpaper-studio-api-staging",
+      "vars": { "WORKER_ENVIRONMENT": "staging" },
+      "queues": { "producers": [{ "binding": "INGEST_QUEUE", "queue": "live-wallpaper-media-ingest-staging" }] },
+      "r2_buckets": [
+        { "binding": "R2_INGEST", "bucket_name": "live-wallpaper-ingest-staging" },
+        { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published-staging" }
+      ]
+    },
+    "production": {
+      "name": "live-wallpaper-studio-api",
+      "vars": { "WORKER_ENVIRONMENT": "production" },
+      "queues": { "producers": [{ "binding": "INGEST_QUEUE", "queue": "live-wallpaper-media-ingest" }] },
+      "r2_buckets": [
+        { "binding": "R2_INGEST", "bucket_name": "live-wallpaper-ingest-private" },
+        { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published" }
+      ]
+    }
+  }
+}
