@@ -66,21 +66,23 @@ public sealed class DownloadManager
                 response.EnsureSuccessStatusCode();
 
                 await using var content = await response.Content.ReadAsStreamAsync(ct);
-                await using var file = new FileStream(
-                    tempPath, resumed ? FileMode.Append : FileMode.Create,
-                    FileAccess.Write, FileShare.None, 8192, useAsync: true);
-                byte[] buffer = new byte[8192];
-                long done = existing;
-                int read;
-                while ((read = await content.ReadAsync(buffer, ct)) > 0)
                 {
-                    await file.WriteAsync(buffer.AsMemory(0, read), ct);
-                    done += read;
-                    progress?.Report((done, response.Content.Headers.ContentLength.HasValue
-                        ? response.Content.Headers.ContentLength.Value + existing
-                        : null));
+                    await using var file = new FileStream(
+                        tempPath, resumed ? FileMode.Append : FileMode.Create,
+                        FileAccess.Write, FileShare.None, 8192, useAsync: true);
+                    byte[] buffer = new byte[8192];
+                    long done = existing;
+                    int read;
+                    while ((read = await content.ReadAsync(buffer, ct)) > 0)
+                    {
+                        await file.WriteAsync(buffer.AsMemory(0, read), ct);
+                        done += read;
+                        progress?.Report((done, response.Content.Headers.ContentLength.HasValue
+                            ? response.Content.Headers.ContentLength.Value + existing
+                            : null));
+                    }
+                    await file.FlushAsync(ct);
                 }
-                await file.FlushAsync(ct);
 
                 var info = new FileInfo(tempPath);
                 if (expectedBytes.HasValue && info.Length != expectedBytes.Value)
