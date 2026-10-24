@@ -8,4 +8,5 @@ obj/
 .dev.vars
 .wrangler/
 node_modules/
+dist/
 artifacts/
