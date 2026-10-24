@@ -21,7 +21,7 @@ add_executable(lws-renderer
 )
 
 target_include_directories(lws-renderer PRIVATE include)
-target_link_libraries(lws-renderer PRIVATE user32 gdi32 dxgi d3d11 mfplat mf mfmediaengine ole32 shcore)
+target_link_libraries(lws-renderer PRIVATE user32 gdi32 dxgi d3d11 mfplat mf ole32 shcore)
 target_compile_definitions(lws-renderer PRIVATE UNICODE _UNICODE)
 
 if(MSVC)
