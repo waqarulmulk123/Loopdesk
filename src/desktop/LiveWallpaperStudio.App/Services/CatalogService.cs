@@ -22,7 +22,7 @@ public static class CatalogService
             Path.Combine(AppContext.BaseDirectory, "assets", "catalog.json"),
             FindProjectAsset("assets", "catalog.json"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LiveWallpaperStudio", "catalog.json"),
-        }.Where(path => !string.IsNullOrEmpty(path)).ToArray()!;
+        };
         foreach (string path in candidates)
         {
             try
