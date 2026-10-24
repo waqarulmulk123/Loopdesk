@@ -71,7 +71,7 @@ bool VideoPlayer::Tick(ID3D11Texture2D* destinationTexture) {
     // available when OnVideoStreamTick returns S_OK with a valid pts.
     HRESULT hr = engine_->OnVideoStreamTick(&pts);
     if (FAILED(hr)) return false;
-    hr = engine_->TransferVideoFrame(destinationTexture, nullptr, nullptr, nullptr, 0);
+    hr = engine_->TransferVideoFrame(destinationTexture, nullptr, nullptr, nullptr);
     if (SUCCEEDED(hr)) {
         ++frames_;
         return true;
@@ -88,7 +88,7 @@ void VideoPlayer::OnEnded() {
     }
 }
 
-IFACEMETHODIMP VideoPlayer::EventNotify(DWORD event, DWORD /*param1*/, DWORD /*param2*/) {
+IFACEMETHODIMP VideoPlayer::EventNotify(DWORD event, DWORD_PTR /*param1*/, DWORD /*param2*/) {
     switch (static_cast<MF_MEDIA_ENGINE_EVENT>(event)) {
         case MF_MEDIA_ENGINE_EVENT_ENDED:
             OnEnded();

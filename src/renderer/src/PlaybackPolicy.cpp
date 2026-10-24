@@ -15,7 +15,7 @@ bool PlaybackPolicy::ShouldPause(HMONITOR monitor, bool sessionLocked, bool disp
 bool PlaybackPolicy::IsFullscreenOnMonitor(HMONITOR monitor) const {
     HWND foreground = GetForegroundWindow();
     if (!foreground || !monitor) return false;
-    if (GetMonitorFromWindow(foreground, MONITOR_DEFAULTTONULL) != monitor) return false;
+    if (MonitorFromWindow(foreground, MONITOR_DEFAULTTONULL) != monitor) return false;
 
     // A fullscreen app covers the whole monitor and is not a normal
     // resizable window. Always-on-top utility windows are not counted:
