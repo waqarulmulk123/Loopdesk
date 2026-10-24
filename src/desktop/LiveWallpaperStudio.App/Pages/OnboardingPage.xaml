@@ -1,0 +1,20 @@
+<Page
+    x:Class="LiveWallpaperStudio.App.Pages.OnboardingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <Grid.Transitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+            </TransitionCollection>
+        </Grid.Transitions>
+        <StackPanel Spacing="16" VerticalAlignment="Center" MaxWidth="640">
+            <TextBlock Text="Welcome to Live Wallpaper Studio" Style="{StaticResource TitleTextBlockStyle}" TextWrapping="Wrap" />
+            <TextBlock Text="Step 1 — Pick a wallpaper from Library or Discover." TextWrapping="Wrap" />
+            <TextBlock Text="Step 2 — Preview it on Home, then press Apply wallpaper." TextWrapping="Wrap" />
+            <TextBlock Text="Step 3 — It plays behind your desktop icons. Press Stop anytime to return to a static desktop. No account is required, and nothing is uploaded." TextWrapping="Wrap" />
+            <Button Content="Start — go to Home" Click="StartButton_Click" />
+            <TextBlock Text="You can return to this welcome screen from About, and change everything later in Settings." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+    </Grid>
+</Page>

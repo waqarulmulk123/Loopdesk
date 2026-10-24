@@ -1,0 +1,18 @@
+<Page
+    x:Class="LiveWallpaperStudio.App.Pages.DisplaysPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <Grid.Transitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+            </TransitionCollection>
+        </Grid.Transitions>
+        <StackPanel Spacing="12">
+            <TextBlock Text="Displays" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" TextWrapping="Wrap" />
+            <Button Content="Refresh displays" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <TextBlock Text="Per-monitor assignment, duplicate and span are handled by the native renderer (DisplayManager). Monitor assignment UI in this page shows the detected count and primary size; full per-monitor selection is a renderer-side assignment, not a fake preview." TextWrapping="Wrap" />
+        </StackPanel>
+    </Grid>
+</Page>

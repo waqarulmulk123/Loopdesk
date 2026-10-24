@@ -1,0 +1,21 @@
+<Page
+    x:Class="LiveWallpaperStudio.App.Pages.DiagnosticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <Grid.Transitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+            </TransitionCollection>
+        </Grid.Transitions>
+        <StackPanel Spacing="12">
+            <TextBlock Text="Diagnostics" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" />
+            <TextBlock Text="{x:Bind ViewModel.OsVersion, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind ViewModel.RendererStatus, Mode=OneWay}" />
+            <TextBlock Text="{x:Bind ViewModel.MediaFolder, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind ViewModel.CatalogStatus, Mode=OneWay}" TextWrapping="Wrap" />
+            <Button Content="Refresh diagnostics" Command="{x:Bind ViewModel.RefreshCommand}" />
+        </StackPanel>
+    </Grid>
+</Page>

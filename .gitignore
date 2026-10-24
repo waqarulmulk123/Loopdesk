@@ -4,3 +4,8 @@ obj/
 .vs/
 *.user
 *.suo
+.env
+.dev.vars
+.wrangler/
+node_modules/
+artifacts/
