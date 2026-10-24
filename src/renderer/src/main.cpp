@@ -163,7 +163,7 @@ int RunVideo(const std::wstring& videoPath) {
 
 int main(int argc, char** argv) {
     std::cout << "LiveWallpaperStudio renderer (M1 in progress)\n";
-    std::cout << "Displays found: " << ListDisplays() << "\n";
+    std::cout << "Displays found: " << lws::ListDisplays() << "\n";
 
     if (argc >= 3 && std::string(argv[1]) == "--video") {
         // Convert the UTF-8 argument to wide text for Windows APIs.

@@ -40,7 +40,7 @@ public:
     bool IsPlaying() const { return playing_; }
 
     // IMFMediaEngineNotify
-    IFACEMETHODIMP EventNotify(DWORD event, DWORD param1, DWORD param2) override;
+    IFACEMETHODIMP EventNotify(DWORD event, DWORD_PTR param1, DWORD param2) override;
     IFACEMETHODIMP_(ULONG) AddRef() override;
     IFACEMETHODIMP_(ULONG) Release() override;
     IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv) override;
