@@ -1,5 +1,6 @@
 using System.IO.Pipes;
 using System.Text;
+using System.Text.Json;
 
 namespace LiveWallpaperStudio.App.Services;
 
@@ -16,7 +17,14 @@ public static class IpcClient
         await using var client = new NamedPipeClientStream(
             ".", "LiveWallpaperStudioRenderer", PipeDirection.InOut, PipeOptions.Asynchronous);
         await client.ConnectAsync(TimeSpan.FromSeconds(5), ct);
-        string request = $$"""{"protocolVersion":1,"requestId":"{{requestId}}","kind":"request","method":"{{method}}","payload":{}}""";
+        string request = JsonSerializer.Serialize(new
+        {
+            protocolVersion = 1,
+            requestId,
+            kind = "request",
+            method,
+            payload = new { },
+        });
         byte[] bytes = Encoding.UTF8.GetBytes(request);
         await client.WriteAsync(bytes, ct);
         await client.FlushAsync(ct);
