@@ -14,6 +14,7 @@ type UploadRequest = {
   sizeBytes?: unknown;
   sha256?: unknown;
 };
+const maxUploadBytes = 100 * 1024 * 1024;
 
 function positiveInteger(value: unknown, maximum: number): number | null {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= maximum ? value : null;
@@ -51,7 +52,7 @@ export function adminRoutes(): Hono<{ Bindings: AdminBindings }> {
     const width = positiveInteger(body?.width, 16384);
     const height = positiveInteger(body?.height, 16384);
     const fps = positiveInteger(body?.fps, 240);
-    const sizeBytes = positiveInteger(body?.sizeBytes, 2_000_000_000);
+    const sizeBytes = positiveInteger(body?.sizeBytes, maxUploadBytes);
     const sha256 = validSha256(body?.sha256);
     if (!title || title.length > 200 || contentType !== 'video/mp4' || !width || !height || !fps || !sizeBytes || !sha256 || body?.premium === true) {
       return c.json({ error: { code: 'invalid_request', message: 'A non-premium title, H.264 MP4 metadata (width, height, fps, sizeBytes), and sha256 are required.' } }, 400);
@@ -75,11 +76,18 @@ export function adminRoutes(): Hono<{ Bindings: AdminBindings }> {
     const job = await db.prepare('SELECT id, wallpaper_id, state FROM ingest_jobs WHERE id = ?').bind(c.req.param('jobId')).first<{ id: string; wallpaper_id: string; state: string }>();
     if (!job) return c.json({ error: { code: 'not_found', message: 'Upload job not found.' } }, 404);
     if (job.state !== 'awaiting_upload') return c.json({ error: { code: 'invalid_state', message: 'Upload content was already received.' } }, 409);
-    const variant = await db.prepare('SELECT id, object_key, size_bytes FROM media_variants WHERE wallpaper_id = ?').bind(job.wallpaper_id).first<{ id: string; object_key: string; size_bytes: number }>();
+    const variant = await db.prepare('SELECT id, object_key, size_bytes, sha256 FROM media_variants WHERE wallpaper_id = ?').bind(job.wallpaper_id).first<{ id: string; object_key: string; size_bytes: number; sha256: string }>();
     if (!variant) return c.json({ error: { code: 'invalid_state', message: 'Upload variant not found.' } }, 409);
     const declaredLength = c.req.header('content-length');
     if (!declaredLength || !/^\d+$/.test(declaredLength) || Number(declaredLength) !== variant.size_bytes) return c.json({ error: { code: 'invalid_request', message: 'content-length must match the initialized sizeBytes.' } }, 400);
-    await c.env.R2_PUBLISHED.put(variant.object_key, c.req.raw.body, { httpMetadata: { contentType: 'video/mp4' } });
+    const bytes = new Uint8Array(await c.req.raw.arrayBuffer());
+    const isMp4 = bytes.length >= 12 && new TextDecoder().decode(bytes.slice(4, 8)) === 'ftyp';
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const actualSha256 = [...digest].map(value => value.toString(16).padStart(2, '0')).join('');
+    if (bytes.byteLength !== variant.size_bytes || !isMp4 || actualSha256 !== variant.sha256) {
+      return c.json({ error: { code: 'invalid_upload', message: 'Upload must be the initialized MP4 with the expected size and SHA-256.' } }, 400);
+    }
+    await c.env.R2_PUBLISHED.put(variant.object_key, bytes, { httpMetadata: { contentType: 'video/mp4' } });
     await db.batch([
       db.prepare("UPDATE media_variants SET processing_state = 'ready' WHERE id = ?").bind(variant.id),
       db.prepare("UPDATE ingest_jobs SET state = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(job.id),

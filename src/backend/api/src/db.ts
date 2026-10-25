@@ -46,6 +46,7 @@ export async function listCategories(db: Db): Promise<{ id: string; slug: string
 
 export async function searchWallpapers(db: Db, q: string, limit: number): Promise<WallpaperRow[] | null> {
   if (!db) return null;
-  const result = await db.prepare("SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' AND title LIKE ? ORDER BY created_at DESC, id DESC LIMIT ?").bind(`%${q}%`, limit).all<Record<string, unknown>>();
+  const escaped = q.replace(/[\\%_]/g, character => `\\${character}`);
+  const result = await db.prepare("SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' AND title LIKE ? ESCAPE '\\' ORDER BY created_at DESC, id DESC LIMIT ?").bind(`%${escaped}%`, limit).all<Record<string, unknown>>();
   return result.results.map(wallpaper);
 }
