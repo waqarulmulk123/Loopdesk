@@ -1,21 +1,75 @@
 #include "lws/IpcServer.h"
 
+#include <cctype>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 namespace lws {
 
-std::string ExtractJsonString(const std::string& json, const std::string& key) {
+bool TryExtractJsonString(const std::string& json, const std::string& key,
+                          std::string* value) {
+    if (!value) return false;
     std::string needle = "\"" + key + "\"";
     size_t pos = json.find(needle);
-    if (pos == std::string::npos) return {};
+    if (pos == std::string::npos) return false;
     pos = json.find(':', pos + needle.size());
-    if (pos == std::string::npos) return {};
-    pos = json.find('"', pos);
-    if (pos == std::string::npos) return {};
-    size_t end = json.find('"', pos + 1);
-    if (end == std::string::npos) return {};
-    return json.substr(pos + 1, end - pos - 1);
+    if (pos == std::string::npos) return false;
+    ++pos;
+    while (pos < json.size() && std::isspace(static_cast<unsigned char>(json[pos]))) ++pos;
+    if (pos >= json.size() || json[pos++] != '"') return false;
+
+    std::string parsed;
+    while (pos < json.size()) {
+        char current = json[pos++];
+        if (current == '"') {
+            *value = std::move(parsed);
+            return true;
+        }
+        if (static_cast<unsigned char>(current) < 0x20) return false;
+        if (current != '\\') {
+            parsed += current;
+            continue;
+        }
+        if (pos >= json.size()) return false;
+        char escaped = json[pos++];
+        switch (escaped) {
+        case '"': parsed += '"'; break;
+        case '\\': parsed += '\\'; break;
+        case '/': parsed += '/'; break;
+        case 'b': parsed += '\b'; break;
+        case 'f': parsed += '\f'; break;
+        case 'n': parsed += '\n'; break;
+        case 'r': parsed += '\r'; break;
+        case 't': parsed += '\t'; break;
+        default: return false;
+        }
+    }
+    return false;
+}
+
+std::string EscapeJsonString(const std::string& value) {
+    std::ostringstream escaped;
+    for (unsigned char current : value) {
+        switch (current) {
+        case '"': escaped << "\\\""; break;
+        case '\\': escaped << "\\\\"; break;
+        case '\b': escaped << "\\b"; break;
+        case '\f': escaped << "\\f"; break;
+        case '\n': escaped << "\\n"; break;
+        case '\r': escaped << "\\r"; break;
+        case '\t': escaped << "\\t"; break;
+        default:
+            if (current < 0x20) {
+                escaped << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+                        << static_cast<int>(current) << std::dec << std::setfill(' ');
+            } else {
+                escaped << static_cast<char>(current);
+            }
+        }
+    }
+    return escaped.str();
 }
 
 void IpcServer::Run(Handler handler) {
@@ -39,7 +93,8 @@ void IpcServer::Run(Handler handler) {
         DWORD read = 0;
         if (ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size() - 1), &read, nullptr) && read > 0) {
             std::string request(buffer.data(), read);
-            std::string method = ExtractJsonString(request, "method");
+            std::string method;
+            TryExtractJsonString(request, "method", &method);
             std::string response = handler ? handler(method, request) : std::string{};
             DWORD written = 0;
             if (!WriteFile(pipe, response.data(), static_cast<DWORD>(response.size()), &written, nullptr)) {

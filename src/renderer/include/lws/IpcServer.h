@@ -1,10 +1,7 @@
 #pragma once
 
-// Minimal named-pipe IPC server (M1, to be hardened in M5).
-// Protocol: JSON envelope, protocolVersion 1, max 1 MiB, methods from
-// the shared protocol schema. This M1 parser extracts "method" and
-// "requestId" by string search; M3 replaces it with a proper JSON
-// parser and ACL-restricted pipe security. Never accept executable
+// Minimal named-pipe IPC server. Protocol: JSON envelope, protocolVersion 1,
+// max 1 MiB, methods from the shared protocol schema. Never accept executable
 // code, network paths, or unvalidated paths from IPC.
 
 #include <string>
@@ -29,6 +26,8 @@ private:
     HANDLE stopEvent_ = nullptr;
 };
 
-std::string ExtractJsonString(const std::string& json, const std::string& key);
+bool TryExtractJsonString(const std::string& json, const std::string& key,
+                          std::string* value);
+std::string EscapeJsonString(const std::string& value);
 
 }  // namespace lws
