@@ -61,6 +61,43 @@ test('asset delivery reports missing R2 binding instead of returning an object k
   assert.deepEqual(await response.json(), { error: { code: 'not_configured', message: 'Asset delivery is not configured.' } });
 });
 
+test('asset delivery honors a single byte range for resumable downloads', async () => {
+  const db = {
+    prepare() {
+      return {
+        bind() { return this; },
+        async first() { return { object_key: 'published/test.mp4', mime_type: 'video/mp4', premium: 0, visibility: 'published', processing_state: 'ready' }; },
+      };
+    },
+  } as unknown as D1Database;
+  const body = new TextEncoder().encode('2345');
+  const bucket = {
+    async head() { return { size: 10 }; },
+    async get(_key: string, options?: R2GetOptions) {
+      assert.deepEqual(options?.range, { offset: 2, length: 4 });
+      return { body: new ReadableStream({ start(controller) { controller.enqueue(body); controller.close(); } }), httpEtag: 'test-etag', writeHttpMetadata() {} };
+    },
+  } as unknown as R2Bucket;
+  const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content', { headers: { range: 'bytes=2-5' } }), { DB: db, R2_PUBLISHED: bucket });
+  assert.equal(response.status, 206);
+  assert.equal(response.headers.get('content-range'), 'bytes 2-5/10');
+  assert.equal(response.headers.get('accept-ranges'), 'bytes');
+  assert.equal(await response.text(), '2345');
+});
+
+test('asset delivery rejects malformed byte ranges without fetching media', async () => {
+  const db = {
+    prepare() { return { bind() { return this; }, async first() { return { object_key: 'published/test.mp4', mime_type: 'video/mp4', premium: 0, visibility: 'published', processing_state: 'ready' }; } }; },
+  } as unknown as D1Database;
+  const bucket = {
+    async head() { return { size: 10 }; },
+    async get() { throw new Error('media must not be fetched for an invalid range'); },
+  } as unknown as R2Bucket;
+  const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content', { headers: { range: 'bytes=99-100' } }), { DB: db, R2_PUBLISHED: bucket });
+  assert.equal(response.status, 416);
+  assert.equal(response.headers.get('content-range'), 'bytes */10');
+});
+
 test('admin routes are mounted and reject requests without a configured token', async () => {
   const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', { method: 'POST' }), { DB: {} as D1Database });
   assert.equal(response.status, 503);
