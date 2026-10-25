@@ -30,6 +30,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void Save()
     {
+        var existing = LocalSettingsService.Load();
         new LocalSettingsService
         {
             Muted = Muted,
@@ -39,6 +40,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             PauseOnBatterySaver = PauseOnBatterySaver,
             SendUsageAnalytics = SendUsageAnalytics,
             SendCrashReports = SendCrashReports,
+            HasCompletedOnboarding = existing.HasCompletedOnboarding,
+            LowPowerMode = existing.LowPowerMode,
         }.Save();
         Status = "Settings saved locally.";
     }

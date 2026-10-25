@@ -11,7 +11,7 @@ public static class FavouritesService
 {
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "LiveWallpaperStudio", "favourites.json");
+        "Loopdesk", "favourites.json");
 
     public static List<string> Load()
     {

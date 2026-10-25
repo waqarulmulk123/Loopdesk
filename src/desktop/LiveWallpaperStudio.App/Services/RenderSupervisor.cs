@@ -23,7 +23,7 @@ public sealed class RenderSupervisor
 
     public bool Start(string videoPath)
     {
-        Stop();
+        Stop(cleanupPlaybackCopies: false);
         LastError = null;
         if (!File.Exists(videoPath))
         {
@@ -80,7 +80,7 @@ public sealed class RenderSupervisor
         return true;
     }
 
-    public void Stop()
+    public void Stop(bool cleanupPlaybackCopies = true)
     {
         _stopping = true;
         if (_process is { HasExited: false })
@@ -96,7 +96,7 @@ public sealed class RenderSupervisor
         }
         _process?.Dispose();
         _process = null;
-        DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
+        if (cleanupPlaybackCopies) DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
         _unexpectedExits = 0;
         _stopping = false;
     }
