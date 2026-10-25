@@ -1,17 +1,17 @@
-# Packaging — M5, not yet complete
+# Loopdesk Microsoft Store packaging
 
 The supplied Loopdesk artwork is included as `Assets/StoreLogo.png`,
-`Assets/Square150x150Logo.png`, and `Assets/Square44x44Logo.png`. The package
-identity must still be replaced with the publisher's real signing identity
-before an MSIX can be built.
+`Assets/Square150x150Logo.png`, and `Assets/Square44x44Logo.png`. The
+manifest is associated with Microsoft Store product `9NNBCZ64H0LX` and uses
+the Store-assigned package identity `MWaqarUlMulk.Loopdesk`.
 
 ## Store (MSIX)
 
-- Package identity, Store-managed updates, and framework dependencies
-  are set in the Visual Studio packaging project. That project is not
-  yet in this repository; the WinUI app project above is the
-  unpackaged build target for M3.
-- Do not ship an MSIX until the M5 release checklist passes.
+- The desktop project can build a Store MSIX from its in-project manifest.
+  Upload the generated MSIX from the release workflow to Partner Center.
+- Microsoft Store re-signs MSIX packages after certification, so no paid code
+  signing certificate is needed for Store-only distribution. The final package
+  must still pass the M5 release checklist.
 
 ## Direct installer
 
