@@ -98,6 +98,45 @@ test('asset delivery rejects malformed byte ranges without fetching media', asyn
   assert.equal(response.headers.get('content-range'), 'bytes */10');
 });
 
+test('asset delivery rejects ranges for an empty object', async () => {
+  const db = {
+    prepare() { return { bind() { return this; }, async first() { return { object_key: 'published/empty.mp4', mime_type: 'video/mp4', premium: 0, visibility: 'published', processing_state: 'ready' }; } }; },
+  } as unknown as D1Database;
+  const bucket = {
+    async head() { return { size: 0 }; },
+    async get() { throw new Error('empty ranged object must not be fetched'); },
+  } as unknown as R2Bucket;
+  const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content', { headers: { range: 'bytes=0-' } }), { DB: db, R2_PUBLISHED: bucket });
+  assert.equal(response.status, 416);
+  assert.equal(response.headers.get('content-range'), 'bytes */0');
+});
+
+test('admin initialization gives each uploaded variant a unique key', async () => {
+  const variants: unknown[][] = [];
+  const db = {
+    prepare(sql: string) {
+      return {
+        bind(...values: unknown[]) {
+          if (sql.includes('INSERT INTO media_variants')) variants.push(values);
+          return this;
+        },
+      };
+    },
+    async batch() { return []; },
+  } as unknown as D1Database;
+  const request = () => new Request('https://api.test/v1/admin/uploads/init', {
+    method: 'POST',
+    headers: { authorization: 'Bearer test-token', 'content-type': 'application/json' },
+    body: JSON.stringify({ title: 'Test video', contentType: 'video/mp4', width: 1920, height: 1080, fps: 30, sizeBytes: 1024, sha256: 'a'.repeat(64) }),
+  });
+  const env = { DB: db, R2_PUBLISHED: {} as R2Bucket, ADMIN_API_TOKEN: 'test-token' };
+  assert.equal((await app.fetch(request(), env)).status, 201);
+  assert.equal((await app.fetch(request(), env)).status, 201);
+  assert.equal(variants.length, 2);
+  assert.match(variants[0][2] as string, /^source-/);
+  assert.notEqual(variants[0][2], variants[1][2]);
+});
+
 test('admin routes are mounted and reject requests without a configured token', async () => {
   const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', { method: 'POST' }), { DB: {} as D1Database });
   assert.equal(response.status, 503);

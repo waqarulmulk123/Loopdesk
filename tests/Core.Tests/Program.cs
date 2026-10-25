@@ -25,6 +25,7 @@ Check(IpcValidation.IsAllowedLocalPath(@"C:\Users\Example\Videos\loop.mp4"), "lo
 var envelope = new IpcEnvelope(1, Guid.NewGuid().ToString(), "request", "engine.status", null);
 Check(IpcValidation.IsValidEnvelope(envelope, 128), "valid envelope passes");
 Check(!IpcValidation.IsValidEnvelope(envelope with { ProtocolVersion = 2 }, 128), "wrong protocol version is rejected");
+Check(!IpcValidation.IsValidEnvelope(envelope with { Kind = "response" }, 128), "response envelopes are rejected as renderer requests");
 Check(!IpcValidation.IsValidEnvelope(envelope, IpcValidation.MaxMessageBytes + 1), "oversized message is rejected");
 
 var variant = new MediaVariant("v1", "video/mp4", "h264", 1920, 1080, 30, 1000, new string('0', 64), null);
@@ -54,6 +55,16 @@ try
         DownloadManager.ComputeSha256Hex(downloaded), downloaded.Length);
     Check(result.Success && await File.ReadAllTextAsync(finalFile) == "new-video" && !File.Exists(tempFile),
         "download atomically replaces an existing cache file without deleting it first");
+
+    await File.WriteAllTextAsync(tempFile, "stale-partial");
+    var restarted = await manager.DownloadAsync("https://example.invalid/video.mp4", tempFile, finalFile,
+        DownloadManager.ComputeSha256Hex(downloaded), downloaded.Length);
+    Check(restarted.Success && await File.ReadAllTextAsync(finalFile) == "new-video" && !File.Exists(tempFile),
+        "download replaces a stale partial file when the origin ignores its range");
+
+    var rejected = await manager.DownloadAsync("https://example.invalid/video.mp4", tempFile, finalFile,
+        new string('0', 64), downloaded.Length);
+    Check(!rejected.Success && !File.Exists(tempFile), "checksum mismatch removes the rejected partial file");
 }
 finally
 {

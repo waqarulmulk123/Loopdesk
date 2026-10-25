@@ -58,7 +58,23 @@ public sealed class DownloadManager
                 }
 
                 using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+                if (existing > 0 && response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
+                {
+                    // The origin no longer accepts this partial length. Start
+                    // cleanly instead of retrying the same invalid range.
+                    File.Delete(tempPath);
+                    existing = 0;
+                    continue;
+                }
                 bool resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent;
+                if (resumed && response.Content.Headers.ContentRange?.From != existing)
+                {
+                    // A mismatched range would append unrelated bytes and
+                    // can never pass the final integrity check.
+                    if (File.Exists(tempPath)) File.Delete(tempPath);
+                    existing = 0;
+                    continue;
+                }
                 if (!resumed)
                 {
                     existing = 0;
@@ -94,6 +110,7 @@ public sealed class DownloadManager
                     string actual = await ComputeFileSha256HexAsync(tempPath, ct);
                     if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
                     {
+                        File.Delete(tempPath);
                         return new DownloadResult(false, "SHA-256 mismatch; file rejected.");
                     }
                 }
