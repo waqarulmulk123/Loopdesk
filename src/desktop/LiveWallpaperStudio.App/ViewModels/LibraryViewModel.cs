@@ -74,4 +74,11 @@ public sealed partial class LibraryViewModel : ObservableObject
             ? $"Applied {SelectedMedia!.Title}."
             : $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
     }
+
+    [RelayCommand]
+    private void StopWallpaper()
+    {
+        RenderSupervisor.Instance.Stop();
+        Status = "Wallpaper stopped.";
+    }
 }

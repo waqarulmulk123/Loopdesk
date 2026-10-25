@@ -142,3 +142,29 @@ test('admin routes are mounted and reject requests without a configured token', 
   assert.equal(response.status, 503);
   assert.deepEqual(await response.json(), { error: { code: 'not_configured', message: 'Admin authentication is not configured.' } });
 });
+
+test('admin upload rejects media whose SHA-256 does not match initialization', async () => {
+  let putCalled = false;
+  const db = {
+    prepare(sql: string) {
+      return {
+        bind() { return this; },
+        async first() {
+          if (sql.includes('FROM ingest_jobs')) return { id: 'job-1', wallpaper_id: 'wallpaper-1', state: 'awaiting_upload' };
+          if (sql.includes('FROM media_variants')) return { id: 'variant-1', object_key: 'published/test.mp4', size_bytes: 12, sha256: 'a'.repeat(64) };
+          return null;
+        },
+      };
+    },
+    async batch() { return []; },
+  } as unknown as D1Database;
+  const bucket = { async put() { putCalled = true; } } as unknown as R2Bucket;
+  const body = new Uint8Array([0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70, 0, 0, 0, 0]);
+  const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/job-1/content', {
+    method: 'PUT',
+    headers: { authorization: 'Bearer test-token', 'content-type': 'video/mp4', 'content-length': '12' },
+    body,
+  }), { DB: db, R2_PUBLISHED: bucket, ADMIN_API_TOKEN: 'test-token' });
+  assert.equal(response.status, 400);
+  assert.equal(putCalled, false);
+});
