@@ -62,6 +62,16 @@ public sealed class RenderSupervisor
             return false;
         }
 
+        // A process can start and immediately exit when Explorer cannot host
+        // the wallpaper window. Report that real failure, not a false apply.
+        if (_process.WaitForExit(300))
+        {
+            LastError = $"Renderer exited immediately (code {_process.ExitCode}).";
+            _process.Dispose();
+            _process = null;
+            return false;
+        }
+
         _process.EnableRaisingEvents = true;
         _process.Exited += (sender, _) =>
         {

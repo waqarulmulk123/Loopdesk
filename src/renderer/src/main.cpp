@@ -38,7 +38,7 @@ std::string IpcHandler(const std::string& method, const std::string& request) {
     if (g_paused.load()) state = "Paused";
     if (method == "engine.hello") {
         return "{\"protocolVersion\":1,\"requestId\":\"" + requestId +
-               "\",\"kind\":\"response\",\"success\":true,\"payload\":{\"state\":\"Ready\",\"capabilities\":[\"video\",\"multi-monitor\"]},\"error\":null}";
+               "\",\"kind\":\"response\",\"success\":true,\"payload\":{\"state\":\"Ready\",\"capabilities\":[\"video\"]},\"error\":null}";
     }
     if (method == "engine.status") {
         auto* player = g_player.load();

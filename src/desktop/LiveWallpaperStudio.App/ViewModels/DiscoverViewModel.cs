@@ -116,7 +116,7 @@ public sealed partial class DiscoverViewModel : ObservableObject
             string finalPath = Path.Combine(mediaDirectory, safeName + ".mp4");
             var manager = new DownloadManager();
             DownloadResult result = await manager.DownloadAsync(download.DownloadUri.ToString(), finalPath + ".partial", finalPath,
-                download.Variant.Sha256, download.Variant.Size_Bytes);
+                download.Variant.Sha256, download.Variant.SizeBytes);
             if (!result.Success)
             {
                 CatalogStatus = $"Download failed: {result.FailureReason}";

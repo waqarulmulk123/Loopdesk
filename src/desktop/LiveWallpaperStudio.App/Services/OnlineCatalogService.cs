@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace LiveWallpaperStudio.App.Services;
 
@@ -26,7 +27,7 @@ public sealed class OnlineCatalogService
             throw new InvalidOperationException("Premium wallpapers require an entitlement provider before download.");
 
         OnlineVariant? variant = detail.Variants
-            .Where(candidate => string.Equals(candidate.Mime_Type, "video/mp4", StringComparison.OrdinalIgnoreCase) &&
+            .Where(candidate => string.Equals(candidate.MimeType, "video/mp4", StringComparison.OrdinalIgnoreCase) &&
                                 string.Equals(candidate.Codec, "h264", StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(candidate => candidate.Width * (long)candidate.Height)
             .FirstOrDefault();
@@ -58,6 +59,22 @@ public sealed class OnlineCatalogService
     private sealed record DownloadAuthorization(string DownloadUrl);
 }
 
-public sealed record OnlineCatalogItem(string Id, string Title, string? Description, string Kind, bool Premium, string Created_At);
-public sealed record OnlineVariant(string Id, string Variant_Key, string Mime_Type, string Codec, int Width, int Height, int Fps, long Size_Bytes, string Sha256);
+public sealed record OnlineCatalogItem(
+    string Id,
+    string Title,
+    string? Description,
+    string Kind,
+    bool Premium,
+    [property: JsonPropertyName("created_at")] string CreatedAt);
+
+public sealed record OnlineVariant(
+    string Id,
+    [property: JsonPropertyName("variant_key")] string VariantKey,
+    [property: JsonPropertyName("mime_type")] string MimeType,
+    string Codec,
+    int Width,
+    int Height,
+    int Fps,
+    [property: JsonPropertyName("size_bytes")] long SizeBytes,
+    string Sha256);
 public sealed record OnlineDownload(OnlineCatalogItem Item, OnlineVariant Variant, Uri DownloadUri);
