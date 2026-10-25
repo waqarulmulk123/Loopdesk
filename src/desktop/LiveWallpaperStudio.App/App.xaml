@@ -10,24 +10,52 @@
             </ResourceDictionary.MergedDictionaries>
             <!-- The gallery uses deep blue-black surfaces so the artwork, not
                  the chrome, is the focal point. -->
-            <Color x:Key="PremiumAccentColor">#FF57D5F6</Color>
-            <Color x:Key="PremiumAccentLightColor">#FFB7F3FF</Color>
+            <Color x:Key="PremiumAccentColor">#FF35D8F1</Color>
+            <Color x:Key="PremiumAccentLightColor">#FFB9F7FF</Color>
             <Color x:Key="PremiumGoldColor">#FFFFD166</Color>
-            <Color x:Key="PremiumCardColor">#FF17202B</Color>
-            <Color x:Key="PremiumSurfaceColor">#FF0C121B</Color>
-            <Color x:Key="PremiumTextPrimaryColor">#FFFFFFFF</Color>
-            <Color x:Key="PremiumTextSecondaryColor">#FFB8B8C0</Color>
+            <Color x:Key="PremiumCardColor">#FF121D36</Color>
+            <Color x:Key="PremiumSurfaceColor">#FF070F22</Color>
+            <Color x:Key="PremiumTextPrimaryColor">#FFF3F6FF</Color>
+            <Color x:Key="PremiumTextSecondaryColor">#FFA9B8D5</Color>
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="{StaticResource PremiumAccentColor}" />
             <SolidColorBrush x:Key="PremiumGoldBrush" Color="{StaticResource PremiumGoldColor}" />
             <SolidColorBrush x:Key="PremiumCardBrush" Color="{StaticResource PremiumCardColor}" />
             <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="{StaticResource PremiumSurfaceColor}" />
             <SolidColorBrush x:Key="PremiumTextSecondaryBrush" Color="{StaticResource PremiumTextSecondaryColor}" />
+            <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF071024" />
+            <SolidColorBrush x:Key="ShellRailBrush" Color="#FF0D1732" />
+            <SolidColorBrush x:Key="ShellBorderBrush" Color="#FF223456" />
+            <SolidColorBrush x:Key="HomeHeroBrush" Color="#FF0B1C38" />
+            <LinearGradientBrush x:Key="HomeHeroOverlayBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#FF08182E" Offset="0" />
+                <GradientStop Color="#EC08182E" Offset="0.37" />
+                <GradientStop Color="#3508182E" Offset="0.76" />
+                <GradientStop Color="#0008182E" Offset="1" />
+            </LinearGradientBrush>
             <CornerRadius x:Key="PremiumCardCornerRadius">12,12,12,12</CornerRadius>
             <CornerRadius x:Key="PremiumButtonCornerRadius">8,8,8,8</CornerRadius>
             <Thickness x:Key="PremiumPagePadding">24,24,24,24</Thickness>
             <x:Double x:Key="PremiumTitleFontSize">28</x:Double>
             <x:Double x:Key="PremiumSubtitleFontSize">18</x:Double>
             <x:Double x:Key="PremiumBodyFontSize">14</x:Double>
+            <Style x:Key="HomePrimaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="#FF1769E8" />
+                <Setter Property="Foreground" Value="#FFFFFFFF" />
+                <Setter Property="BorderBrush" Value="#FF4397FF" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="9" />
+                <Setter Property="Padding" Value="18,10" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+            <Style x:Key="HomeSecondaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="#FF101D38" />
+                <Setter Property="Foreground" Value="#FFF3F6FF" />
+                <Setter Property="BorderBrush" Value="#FF2B4169" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="9" />
+                <Setter Property="Padding" Value="18,10" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
