@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "live-wallpaper-studio-processor",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "containers": [{ "class_name": "MediaTranscoder", "image": "./Dockerfile", "max_instances": 1 }],
+  "durable_objects": { "bindings": [{ "name": "TRANSCODER", "class_name": "MediaTranscoder" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MediaTranscoder"] }],
+  "env": {
+    "staging": {
+      "name": "live-wallpaper-studio-processor-staging",
+      "containers": [{ "class_name": "MediaTranscoder", "image": "./Dockerfile", "max_instances": 1 }],
+      "durable_objects": { "bindings": [{ "name": "TRANSCODER", "class_name": "MediaTranscoder" }] },
+      "d1_databases": [{ "binding": "DB", "database_name": "live-wallpaper-studio-staging", "database_id": "5ab5270c-ac52-45c1-aaaf-7cc0b4cee355" }],
+      "r2_buckets": [{ "binding": "R2_INGEST", "bucket_name": "live-wallpaper-ingest-staging" }, { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published-staging" }],
+      "queues": { "consumers": [{ "queue": "live-wallpaper-media-ingest-staging", "dead_letter_queue": "live-wallpaper-media-dead-letter-staging", "max_batch_size": 1, "max_retries": 3 }] }
+    },
+    "production": {
+      "name": "live-wallpaper-studio-processor",
+      "containers": [{ "class_name": "MediaTranscoder", "image": "./Dockerfile", "max_instances": 1 }],
+      "durable_objects": { "bindings": [{ "name": "TRANSCODER", "class_name": "MediaTranscoder" }] },
+      "d1_databases": [{ "binding": "DB", "database_name": "live-wallpaper-studio", "database_id": "1bc16733-bcde-45fb-94ed-9af6f7a01bd6" }],
+      "r2_buckets": [{ "binding": "R2_INGEST", "bucket_name": "live-wallpaper-ingest-private" }, { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published" }],
+      "queues": { "consumers": [{ "queue": "live-wallpaper-media-ingest", "dead_letter_queue": "live-wallpaper-media-dead-letter", "max_batch_size": 1, "max_retries": 3 }] }
+    }
+  }
+}

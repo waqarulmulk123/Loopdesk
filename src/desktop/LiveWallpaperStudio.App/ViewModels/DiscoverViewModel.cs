@@ -7,7 +7,9 @@ namespace LiveWallpaperStudio.App.ViewModels;
 
 public sealed partial class DiscoverViewModel : ObservableObject
 {
-    public DiscoverViewModel() => Refresh();
+    private readonly OnlineCatalogService _onlineCatalog = new();
+
+    public DiscoverViewModel() => _ = Refresh();
 
     [ObservableProperty]
     private string _catalogStatus = "Catalog: not loaded.";
@@ -20,13 +22,30 @@ public sealed partial class DiscoverViewModel : ObservableObject
     private List<CatalogService.CatalogItem> _allItems = new();
 
     [RelayCommand]
-    private void Refresh()
+    private async Task Refresh()
     {
         _allItems = CatalogService.Load();
+        var apiBaseUrl = LocalSettingsService.Load().ApiBaseUrl ?? LocalSettingsService.DefaultApiBaseUrl;
+        if (!string.IsNullOrWhiteSpace(apiBaseUrl))
+        {
+            try
+            {
+                var onlineItems = await _onlineCatalog.LoadAsync(apiBaseUrl);
+                _allItems = onlineItems.Select(item => new CatalogService.CatalogItem(item.Id, item.Title, string.Empty, null, item.Premium, "Online", string.Empty)).ToList();
+                CatalogStatus = $"Online catalog: {_allItems.Count} item(s) from {new Uri(apiBaseUrl).Host}.";
+            }
+            catch (Exception ex)
+            {
+                CatalogStatus = _allItems.Count > 0
+                    ? $"Online catalog unavailable ({ex.Message}); showing local catalog."
+                    : $"Online catalog unavailable: {ex.Message}";
+            }
+        }
         ApplySearch();
-        CatalogStatus = _allItems.Count > 0
-            ? $"Catalog: {_allItems.Count} item(s) loaded from assets/catalog.json."
-            : "Catalog: not configured or catalog.json not found next to the app.";
+        if (string.IsNullOrWhiteSpace(apiBaseUrl))
+            CatalogStatus = _allItems.Count > 0
+                ? $"Catalog: {_allItems.Count} item(s) loaded from assets/catalog.json."
+                : "Catalog: not configured or catalog.json not found next to the app.";
     }
 
     [RelayCommand]

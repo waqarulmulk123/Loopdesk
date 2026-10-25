@@ -11,7 +11,7 @@
         <StackPanel Spacing="12">
             <TextBlock Text="About" Style="{StaticResource TitleTextBlockStyle}" />
             <TextBlock Text="Live Wallpaper Studio — working product name, rename before release." TextWrapping="Wrap" />
-            <TextBlock Text="WinUI 3 + .NET 10 + Windows App SDK 2.5.1, native C++ renderer (D3D11, Media Foundation), SQLite locally, Cloudflare Workers + PostgreSQL + R2 for the optional catalog." TextWrapping="Wrap" />
+            <TextBlock Text="WinUI 3 + .NET 10 + Windows App SDK 2.5.1, native C++ renderer (D3D11, Media Foundation), SQLite locally, Cloudflare Workers + D1 + R2 for the optional catalog." TextWrapping="Wrap" />
             <TextBlock Text="Offline-first. No fake content, no topmost fake wallpaper, no elevated playback." TextWrapping="Wrap" />
             <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" />
         </StackPanel>

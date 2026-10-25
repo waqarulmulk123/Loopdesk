@@ -27,7 +27,7 @@ public sealed partial class MainViewModel : ObservableObject
         PauseOnBatterySaver = settings.PauseOnBatterySaver;
         SendUsageAnalytics = settings.SendUsageAnalytics;
         SendCrashReports = settings.SendCrashReports;
-        ApiBaseUrl = settings.ApiBaseUrl ?? string.Empty;
+        ApiBaseUrl = settings.ApiBaseUrl ?? LocalSettingsService.DefaultApiBaseUrl;
         RefreshLocalMedia();
         RefreshDisplays();
         RefreshCatalog();

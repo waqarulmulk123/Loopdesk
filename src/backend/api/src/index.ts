@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { adminRoutes } from './admin.js';
 import { createDb, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
 
 // Cloudflare Workers API, spec section 11.
@@ -11,9 +12,12 @@ import { createDb, listWallpapers, getWallpaper, listCategories, searchWallpaper
 
 export type Bindings = DatabaseBindings & {
   PUBLIC_CDN_BASE_URL?: string;
+  R2_PUBLISHED?: R2Bucket;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+app.route('/', adminRoutes());
 
 app.onError((error, c) => {
   console.error('Unhandled API error', error);
@@ -101,9 +105,24 @@ app.post('/v1/assets/:variantId/authorize-download', async (c) => {
       501,
     );
   }
-  const base = c.env.PUBLIC_CDN_BASE_URL ?? '';
-  const downloadUrl = base ? `${base.replace(/\/$/, '')}/${row.object_key}` : row.object_key;
-  return c.json({ downloadUrl, method: 'cdn' });
+  const base = c.env.PUBLIC_CDN_BASE_URL?.replace(/\/$/, '') ?? new URL(c.req.url).origin;
+  return c.json({ downloadUrl: `${base}/v1/assets/${row.id}/content`, method: 'public' });
+});
+
+app.get('/v1/assets/:variantId/content', async (c) => {
+  const db = createDb(c.env);
+  if (!db || !c.env.R2_PUBLISHED) return c.json({ error: { code: 'not_configured', message: 'Asset delivery is not configured.' } }, 501);
+  const row = await db.prepare(
+    `SELECT mv.object_key, mv.mime_type, w.premium, w.visibility, mv.processing_state
+     FROM media_variants mv JOIN wallpapers w ON w.id = mv.wallpaper_id WHERE mv.id = ?`,
+  ).bind(c.req.param('variantId')).first<{ object_key: string; mime_type: string; premium: number; visibility: string; processing_state: string }>();
+  if (!row || row.visibility !== 'published' || row.processing_state !== 'ready') return c.json({ error: { code: 'not_found', message: 'Variant not found.' } }, 404);
+  if (row.premium) return c.json({ error: { code: 'forbidden', message: 'Premium entitlement verification is not configured.' } }, 403);
+  const object = await c.env.R2_PUBLISHED.get(row.object_key);
+  if (!object) return c.json({ error: { code: 'not_found', message: 'Published object not found.' } }, 404);
+  const headers = new Headers({ 'content-type': row.mime_type, 'cache-control': 'public, max-age=31536000, immutable', etag: object.httpEtag });
+  object.writeHttpMetadata(headers);
+  return new Response(object.body, { headers });
 });
 
 app.get('/v1/me/favorites', (c) =>

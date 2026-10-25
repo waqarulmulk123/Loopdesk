@@ -54,3 +54,15 @@ test('wallpaper detail uses D1-compatible placeholders for variant lookup', asyn
   assert.ok(variants.sql.includes('wallpaper_id = ?'));
   assert.deepEqual(variants.values, ['aurora']);
 });
+
+test('asset delivery reports missing R2 binding instead of returning an object key', async () => {
+  const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content'), { DB: {} as D1Database });
+  assert.equal(response.status, 501);
+  assert.deepEqual(await response.json(), { error: { code: 'not_configured', message: 'Asset delivery is not configured.' } });
+});
+
+test('admin routes are mounted and reject requests without a configured token', async () => {
+  const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', { method: 'POST' }), { DB: {} as D1Database });
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: { code: 'not_configured', message: 'Admin authentication is not configured.' } });
+});

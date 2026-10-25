@@ -66,7 +66,7 @@ npm ci
 npm run typecheck
 npm test
 ```
-The deployed staging and production Workers have D1, R2, and Queue bindings. The catalog is intentionally empty until licensed media has been ingested and published. Local development without a D1 binding returns an honest empty catalog.
+The deployed staging and production Workers have D1, R2, and Queue bindings. The desktop defaults to the production `workers.dev` API endpoint; the catalog is intentionally empty until licensed media has been ingested and published. Clear the API URL in Settings for offline-only mode.
 
 ## What is complete, and what is not
 
