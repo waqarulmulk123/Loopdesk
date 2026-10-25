@@ -1,6 +1,7 @@
 #include "lws/DesktopShellAdapter.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace lws {
 
@@ -63,12 +64,28 @@ DesktopAttachResult DesktopShellAdapter::TryAttach(HWND wallpaperHwnd, HMONITOR 
         return result;
     }
 
-    HWND previousParent = SetParent(wallpaperHwnd, state.hostWorker);
-    (void)previousParent;
+    // SetParent does not adjust WS_POPUP/WS_CHILD for us.  Explorer rejects
+    // a popup as a WorkerW child on some Windows 10 builds, so make the
+    // window a child before reparenting and restore its original style if
+    // the operation cannot be verified.
+    const LONG_PTR originalStyle = GetWindowLongPtrW(wallpaperHwnd, GWL_STYLE);
+    SetWindowLongPtrW(wallpaperHwnd, GWL_STYLE,
+                      (originalStyle & ~static_cast<LONG_PTR>(WS_POPUP)) | WS_CHILD);
+    SetLastError(ERROR_SUCCESS);
+    SetParent(wallpaperHwnd, state.hostWorker);
+    const DWORD parentError = GetLastError();
     if (GetParent(wallpaperHwnd) != state.hostWorker) {
-        result.diagnostics = L"SetParent to WorkerW failed; desktop left untouched.";
+        SetWindowLongPtrW(wallpaperHwnd, GWL_STYLE, originalStyle);
+        std::wstringstream diagnostics;
+        diagnostics << L"SetParent to WorkerW failed (Win32 error " << parentError
+                    << L"); desktop left untouched.";
+        result.diagnostics = diagnostics.str();
         return result;
     }
+
+    SetWindowPos(wallpaperHwnd, nullptr, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                 SWP_NOACTIVATE);
 
     result.success = true;
     result.hostWindow = state.hostWorker;
