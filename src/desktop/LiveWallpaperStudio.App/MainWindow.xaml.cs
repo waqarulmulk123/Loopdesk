@@ -2,6 +2,7 @@ using LiveWallpaperStudio.App.Pages;
 using LiveWallpaperStudio.App.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace LiveWallpaperStudio.App;
 
@@ -46,5 +47,16 @@ public sealed partial class MainWindow : Window
         {
             ContentFrame.Navigate(page);
         }
+    }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        BreadcrumbPage.Text = e.SourcePageType.Name.Replace("Page", string.Empty) switch
+        {
+            "Home" => "Home", "Discover" => "Discover", "Library" => "Library",
+            "Favourites" => "Favourites", "Downloads" => "Downloads", "Displays" => "Displays",
+            "Settings" => "Settings", "Diagnostics" => "Diagnostics", "About" => "About",
+            "Onboarding" => "Onboarding", var page => page,
+        };
     }
 }
