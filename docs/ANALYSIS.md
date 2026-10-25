@@ -9,6 +9,10 @@ The combined recommendation is technically strong and broadly suitable:
 
 **WinUI 3 + .NET 10 + C++ + Direct3D 11 + Media Foundation/libmpv + Cloudflare R2 + Workers + PostgreSQL.**
 
+## Current free-tier deployment deviation
+
+The deployed catalog deliberately uses D1 and published R2 only. Cloudflare Containers are unavailable on this account without Workers Paid, so cloud transcoding and Queue processing are not part of the active release. Creators prepare non-premium H.264 MP4 files locally with FFmpeg and publish them through the authenticated direct-upload API. This preserves offline playback and catalog delivery without paid compute.
+
 There is no good reason to replace this foundation with Electron, Tauri, a fully Rust architecture, or D3D12 just to look more advanced. The competitive advantage will come from renderer quality, power management, reliable Windows integration, fast delivery, and polished UX — not from adding more frameworks.
 
 ## What the earlier research got right

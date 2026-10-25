@@ -7,7 +7,7 @@ A native Windows live-wallpaper application. Working product name only — renam
 - WinUI 3 desktop app for browsing, importing and applying wallpapers
 - Native C++ renderer that plays video **behind desktop icons**, with multi-monitor support
 - Offline-first: imported and downloaded wallpapers play without internet
-- Optional Cloudflare-backed catalog: Workers + D1 + R2 + Queues
+- Optional Cloudflare-backed catalog: Workers + D1 + R2
 
 ## Finalized stack
 
@@ -21,8 +21,8 @@ A native Windows live-wallpaper application. Working product name only — renam
 | Local state | SQLite, WAL |
 | Backend | TypeScript + Cloudflare Workers + Hono |
 | Catalog database | Cloudflare D1 (catalog metadata) |
-| Storage / delivery | Cloudflare R2 Standard, custom-domain CDN for public assets |
-| Ingest | Cloudflare Queues + FFmpeg processing job (never inside a Worker request) |
+| Storage / delivery | Cloudflare R2 served through the Workers API |
+| Publishing | Local FFmpeg preparation + authenticated direct MP4 publishing |
 | CI / distribution | GitHub Actions, MSIX for Store, signed direct installer |
 
 ## Key architecture decisions
@@ -66,10 +66,10 @@ npm ci
 npm run typecheck
 npm test
 ```
-The deployed staging and production Workers have D1, R2, and Queue bindings. The desktop defaults to the production `workers.dev` API endpoint; the catalog is intentionally empty until licensed media has been ingested and published. Clear the API URL in Settings for offline-only mode.
+The deployed staging and production Workers have D1 and published-R2 bindings. The desktop defaults to the production `workers.dev` API endpoint; the catalog is intentionally empty until a licensed, locally prepared MP4 has been directly published. Clear the API URL in Settings for offline-only mode.
 
 ## What is complete, and what is not
 
-Complete in code for local development: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, download manager, cache, IPC validation, SQLite schema), Workers API (D1 catalog queries, public download authorization, premium refusal without entitlement), queue-processing contract, MSIX manifest template, CI workflow, docs and test plan.
+Complete in code for local development: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, download manager, cache, IPC validation, SQLite schema), Workers API (D1 catalog queries, public download authorization, authenticated direct publishing of locally prepared non-premium MP4 files), MSIX manifest template, CI workflow, docs and test plan.
 
 Still P1 / not implemented: WebView2 interactive wallpapers, playlists, premium sync, account favourites, and a signed installer. Still not verified: every Windows build, desktop-attachment, multi-monitor and physical acceptance test in `docs/TEST_PLAN.md` — run those on real Windows before any release claim.
