@@ -16,7 +16,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         PauseOnBatterySaver = s.PauseOnBatterySaver;
         SendUsageAnalytics = s.SendUsageAnalytics;
         SendCrashReports = s.SendCrashReports;
-        ApiBaseUrl = s.ApiBaseUrl ?? string.Empty;
+        ApiBaseUrl = s.ApiBaseUrl ?? LocalSettingsService.DefaultApiBaseUrl;
     }
 
     [ObservableProperty] private bool _muted = true;

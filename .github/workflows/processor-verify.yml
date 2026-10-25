@@ -1,0 +1,25 @@
+name: Processor verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-processor:
+    name: Verify media processor
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend/processing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/backend/processing/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+      - run: npx wrangler deploy --env staging --dry-run

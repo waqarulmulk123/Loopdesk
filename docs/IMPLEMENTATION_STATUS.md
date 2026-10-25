@@ -10,7 +10,7 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 | M1 — Minimal real desktop video wallpaper | Code written, NOT tested on Windows | D3D11 device, display enumeration, pause policy, per-monitor window, swap-chain presenter, Media Foundation frame-server player, WorkerW shell adapter, named-pipe IPC server. Gate (visible video behind icons) not met yet. |
 | M2 — Reliable engine, multi-monitor | Code written, NOT tested on Windows | Display model (device, bounds, DPI, primary), IPC handler wired into the render loop, bootstrap/sample/test scripts. Explorer-restart re-attachment and device-loss recreation are coded as re-attach/recreate paths, not yet proven on Windows. Gate not met yet. |
 | M3 — Full offline Windows application | Code written, NOT tested on Windows | WinUI 3 app, MVVM view model, renderer supervisor, IPC client, settings, download manager, cache rules, SQLite schema. Tray, library/displays views and MSIX packaging project are notes/skeleton only. Gate not met yet. |
-| M4 — Real Cloudflare backend | Core infrastructure deployed; ingest incomplete | Staging and production Workers, D1 catalog databases, R2 ingest/published buckets, and Queues are deployed. The API uses D1 and returns real catalog data when populated. No FFmpeg queue consumer, custom CDN domain, admin identity policy, licensed catalog content, or premium entitlement provider is deployed. |
+| M4 — Real Cloudflare backend | API deployed; processor ready to deploy | Staging and production API Workers, D1 databases, R2 buckets, ingest/dead-letter Queues, token-protected admin workflow, and Workers.dev media delivery are configured. The FFmpeg Container processor is implemented and CI-validated but awaits deployment from a Docker-capable machine. No custom CDN domain, licensed catalog content, or premium entitlement provider is deployed. |
 | M5 — Production UX, security, install, tests | Docs written, NOT verified | Release checklist, test plan, API, security and deployment docs, packaging notes. No installer, signing workflow or release evidence yet. Gate not met yet. |
 | M6 — P1 extensions | Not started | WebView2 interactive wallpapers, playlists, premium sync — documented as not implemented, not shown as enabled features. |
 
@@ -27,8 +27,8 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 
 ## What is NOT done
 
-- The Cloudflare queue has no consumer, so ingest messages cannot become published video variants.
-- The desktop app does not yet consume the online API; its configured API URL is stored but the catalog remains local-only.
+- The Cloudflare Container processor needs a Docker-compatible deployment machine; until deployed, ingest messages cannot become published video variants.
+- The desktop Discover screen consumes the configured HTTPS API catalog; applying an online item and account/premium workflows remain incomplete.
 - No licensed media has been ingested or published.
 - No installer has been built or signed.
 - No payment/OIDC entitlement system or admin authorization policy is deployed.
