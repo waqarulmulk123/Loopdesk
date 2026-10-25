@@ -32,3 +32,17 @@
 OS build, Explorer version, CPU architecture, GPU + driver, display
 configuration (single/dual, mixed DPI, portrait/landscape), codec
 (H.264 720p/1080p/4K), and the exact test result (PASS / FAIL / NOT RUN).
+
+## Reproducible physical attachment proof
+
+On a Windows desktop, run:
+
+```powershell
+.\scripts\test-renderer-desktop-attachment.ps1 -VideoPath .\assets\wallpapers\loopdesk\loopdesk_aurora_dreamscape.mp4
+```
+
+The script fails unless the real renderer window is a child of a `WorkerW`
+that does not host `SHELLDLL_DefView` (the desktop-icon view), then confirms
+that decoded frames advance and that shutdown is clean. It is a structural
+proof of behind-icon attachment; manual icon click/drag observation remains
+the UI acceptance portion of AT-02.
