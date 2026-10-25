@@ -1,0 +1,32 @@
+name: Backend verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-api:
+    name: Verify Workers API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/backend/api/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Type-check and test
+        run: npm run verify
+
+      - name: Validate deploy bundle without credentials
+        run: npx wrangler deploy --env staging --dry-run

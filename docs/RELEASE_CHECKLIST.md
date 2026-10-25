@@ -1,8 +1,7 @@
 # Release checklist — spec section 21
 
 Do NOT describe this product as fully working until every item below
-is actually true on real Windows hardware. As of 2026-10-24, code is
-written locally; Windows CI verification is pending after the final push.
+is actually true on real Windows hardware. GitHub Actions verifies the desktop build and renderer startup, but it does not replace the physical checks below.
 
 - [ ] Native WinUI app compiles and launches on actual target Windows
 - [ ] Native renderer compiles for x64 and actually plays moving video behind icons
@@ -12,7 +11,7 @@ written locally; Windows CI verification is pending after the final push.
 - [ ] Offline launch and previously downloaded media playback verified
 - [ ] SQLite persistent settings/cache survive reboots and crash scenarios
 - [ ] Download manager tested with real Range/ETag/cancellation/checksum behaviour
-- [ ] Workers API deployed to staging, PostgreSQL schema migrated, real R2 object retrieved
+- [ ] Workers API deployed to staging, D1 schema migrated, real R2 object retrieved
 - [ ] Catalog filters and authorised-download flows work when API is configured
 - [ ] At least one admin upload → transcode → validate → publish workflow tested end-to-end
 - [ ] Required unit, integration and shell acceptance tests pass, results archived with dates/build numbers

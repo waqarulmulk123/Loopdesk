@@ -2,10 +2,9 @@ import { Hono } from 'hono';
 import { createDb, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
 
 // Cloudflare Workers API, spec section 11.
-// Real PostgreSQL catalog queries are used when a database is
-// configured (DATABASE_URL / Hyperdrive). Without a database, the
-// catalog is honestly empty and /v1/config reports catalogEnabled:
-// false — no fake content is ever returned.
+// Real D1 catalog queries are used when the DB binding is configured.
+// Without a database, the catalog is honestly empty and /v1/config
+// reports catalogEnabled: false — no fake content is ever returned.
 // Premium downloads: public assets return the CDN URL; premium
 // assets without a configured auth/entitlement system return 501
 // rather than a signed URL that bypasses entitlement checks.
@@ -56,7 +55,7 @@ app.get('/v1/wallpapers/:id', async (c) => {
   }
   const variants = await db?.prepare(
     `SELECT id, variant_key, mime_type, codec, width, height, fps, size_bytes, sha256
-     FROM media_variants WHERE wallpaper_id = $1 AND processing_state = 'ready'
+     FROM media_variants WHERE wallpaper_id = ? AND processing_state = 'ready'
      ORDER BY width DESC, height DESC`,
   ).bind(item.id).all();
   return c.json({ item, variants: variants?.results ?? [] });

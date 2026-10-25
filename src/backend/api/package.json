@@ -1,1 +1,25 @@
-{"dependencies":{"hono":"^4.0.0"},"devDependencies":{"@cloudflare/workers-types":"^5.20261019.1","@types/node":"^22.0.0","typescript":"^5.0.0","wrangler":"^4.0.0"},"engines":{"node":">=20"},"name":"live-wallpaper-studio-api","private":true,"scripts":{"build":"tsc","deploy":"wrangler deploy","dev":"wrangler dev --local","lint":"tsc --noEmit","test":"npm run build && node --test dist/test/*.test.js","typecheck":"tsc --noEmit","verify":"npm run lint && npm test"},"type":"module","version":"0.2.0"}
+{
+  "name": "live-wallpaper-studio-api",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "dev": "wrangler dev --local",
+    "lint": "tsc --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run lint && npm test"
+  },
+  "dependencies": { "hono": "^4.0.0" },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^4.0.0"
+  }
+}

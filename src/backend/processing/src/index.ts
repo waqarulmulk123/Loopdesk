@@ -39,7 +39,7 @@ export default {
       // Real implementation (container job): download parsed.sourceKey
       // from R2_INGEST, run transcode.sh, validate with ffprobe,
       // upload to R2_PUBLISHED as parsed.targetKey, then update
-      // ingest_jobs.status = 'completed' in PostgreSQL. On any
+      // ingest_jobs.state = 'completed' in D1. On any
       // error, set status = 'failed' with the error text.
       throw new Error(
         `Processing job not configured in this build: job ${parsed.jobId} requires the container FFmpeg job.`,

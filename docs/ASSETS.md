@@ -51,8 +51,6 @@ Icons (WebP, square):
 - `assets/catalog.json` — the full catalog, with SHA-256, size, codec, dimensions and file paths for every theme.
 - `assets/catalog.db` — a ready SQLite database built from the local schema (`src/desktop/LiveWallpaperStudio.Infrastructure/Sqlite/schema.sql`), containing 16 wallpapers, 16 video assets, the "Premium Themes", "Premium Glass" and "4K Animated" collections, and pinned cache entries. Verified: 16 wallpapers, 16 assets.
 - `src/desktop/LiveWallpaperStudio.Infrastructure/Sqlite/seed.sql` — the same seed as SQL, to apply after schema.sql.
-- `src/backend/database/migrations/002_seed_premium_themes.sql` — the first pack for PostgreSQL, to apply after 001_init.sql.
-- `src/backend/database/migrations/003_seed_premium_glass.sql` — the Premium Glass pack for PostgreSQL, to apply after 002.
-- `src/backend/database/migrations/004_seed_4k_animated.sql` — the 4K pack for PostgreSQL, to apply after 003. All idempotent (`ON CONFLICT DO NOTHING`); wallpapers are published and premium, variants are ready.
+- `src/backend/database/migrations/002_seed_premium_themes.sql`, `003_seed_premium_glass.sql`, and `004_seed_4k_animated.sql` are legacy PostgreSQL seed drafts. They are not applied to the deployed D1 catalog and must not be used for production until they are ported, processed, rights-reviewed, and published through the ingest workflow.
 
 To use locally: copy a video file to `%LOCALAPPDATA%\LiveWallpaperStudio\media`, or point the WinUI app at the bundled file under `assets/wallpapers/video/`, and press Apply. The app plays the video behind desktop icons via the native renderer; set it in Lively Wallpaper / Wallpaper Engine as a fallback if the app's shell attachment is unsupported on your Windows build.

@@ -12,8 +12,9 @@
 ## Step-by-step setup
 
 ```powershell
-# 1. Extract the zip, open a Developer PowerShell for VS 2026
-cd live-wallpaper-studio
+# 1. Clone the repository, then open a Developer PowerShell for VS 2026
+git clone https://github.com/waqarulmulk123/Loopdesk.git
+cd Loopdesk
 
 # 2. Check the toolchain (fails fast with a clear message if something is missing)
 .\scripts\bootstrap-windows.ps1
@@ -37,15 +38,16 @@ cd live-wallpaper-studio
 3. Press Apply wallpaper. The native renderer plays it behind desktop icons.
 4. If attachment is unsupported on your Windows build, the renderer stops with a clear error and leaves the desktop untouched — it never shows a topmost fake wallpaper.
 
-## Backend setup (optional, staging only)
+## Backend setup (optional)
 
 ```powershell
 cd src\backend\api
 npm ci
 npm run typecheck
 npm test
-# Copy .env.example to .env and fill DATABASE_URL / Hyperdrive, R2, Queues, OIDC values.
-# Never commit .env. See docs/DEPLOYMENT.md.
+# Local mode has no D1 binding and returns an empty catalog.
+# Deploys use the named D1/R2/Queue bindings in wrangler.jsonc.
+# Never commit secrets. See docs/DEPLOYMENT.md.
 ```
 
 ## Troubleshooting
