@@ -67,7 +67,9 @@ public sealed partial class DiscoverViewModel : ObservableObject
                 item.Kind.Contains(query, StringComparison.OrdinalIgnoreCase);
             if (matchesQuery)
             {
-                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, "Loopdesk Originals", item.Premium,
+                string category = item.Categories?.FirstOrDefault() ?? "Uncategorized";
+                string resolution = item.Width is > 0 && item.Height is > 0 ? $"{item.Width}×{item.Height}" : "Resolution unavailable";
+                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, category, resolution, item.Premium,
                     DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), PosterFor(item.Id)));
             }
         }
@@ -83,7 +85,7 @@ public sealed partial class DiscoverViewModel : ObservableObject
             "theme-loopdesk-cosmic-infinity" => "media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp",
             "theme-loopdesk-liquid-neon-flow" => "media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp",
             "theme-loopdesk-bioluminescent-ocean" => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp",
-            _ => "media-generation-poster-ocean-sunset-0-211d15cc-bd5b-47cb-82df-35df9f6d2098.webp"
+            _ => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp"
         };
         return $"ms-appx:///assets/wallpapers/posters/{poster}";
     }
@@ -170,7 +172,8 @@ public sealed partial class DiscoverViewModel : ObservableObject
     }
 }
 
-public sealed record DiscoverItem(string Id, string Title, string Theme, bool Premium, bool IsDownloaded, string PosterUri)
+public sealed record DiscoverItem(string Id, string Title, string Theme, string Resolution, bool Premium, bool IsDownloaded, string PosterUri)
 {
-    public string Subtitle => $"{Theme} · 1080p{(Premium ? " · Premium" : string.Empty)}{(IsDownloaded ? " · Downloaded" : string.Empty)}";
+    public string Subtitle => $"{Theme} · {Resolution}{(Premium ? " · Premium" : string.Empty)}{(IsDownloaded ? " · Downloaded" : string.Empty)}";
+    public string Availability => Premium ? "PREMIUM" : "FREE";
 }

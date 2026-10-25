@@ -28,7 +28,7 @@
                 <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search titles and themes" VerticalContentAlignment="Center" />
                 <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
             </Grid>
-            <TextBlock Text="Loopdesk Originals" Foreground="{StaticResource PremiumAccentBrush}" FontWeight="SemiBold" FontSize="13" />
+            <TextBlock Text="Cloud catalog" Foreground="{StaticResource PremiumAccentBrush}" FontWeight="SemiBold" FontSize="13" />
         </StackPanel>
 
         <GridView Grid.Row="2"
@@ -61,7 +61,7 @@
                                     <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
                                     <Border Background="#FF0D494A" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0">
-                                        <TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Availability}" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" />
                                     </Border>
                                 </StackPanel>
                                 <Border Width="42" Height="30" Background="#FF334C79" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom">
