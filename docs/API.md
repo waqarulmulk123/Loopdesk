@@ -1,7 +1,7 @@
 # Cloud API — /v1
 
 Base: Workers + Hono. Stateless HTTP API, validated input/output.
-See `src/backend/api/src/index.ts` for the skeleton implementation.
+See `src/backend/api/src/index.ts` for the deployed D1-backed implementation.
 
 | Method | Endpoint | Purpose | Access |
 |---|---|---|---|
