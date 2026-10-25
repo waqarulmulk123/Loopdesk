@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createPool, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
+import { createDb, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
 
 // Cloudflare Workers API, spec section 11.
 // Real PostgreSQL catalog queries are used when a database is
@@ -34,7 +34,7 @@ app.get('/v1/health', (c) =>
 
 app.get('/v1/config', (c) =>
   c.json({
-    catalogEnabled: Boolean(c.env.HYPERDRIVE?.connectionString ?? c.env.DATABASE_URL),
+    catalogEnabled: Boolean(c.env.DB),
     minClientVersion: '1.0.0',
     supportedMedia: ['video/mp4:h264', 'image/png', 'image/jpeg'],
   }),
@@ -43,28 +43,27 @@ app.get('/v1/config', (c) =>
 app.get('/v1/wallpapers', async (c) => {
   const limit = parseLimit(c.req.query('limit'));
   if (limit === null) return c.json({ error: { code: 'invalid_request', message: 'limit must be a positive integer.' } }, 400);
-  const db = createPool(c.env);
+  const db = createDb(c.env);
   const items = (await listWallpapers(db, limit, c.req.query('category'))) ?? [];
   return c.json({ items, nextCursor: null, limit, catalogVersion: null });
 });
 
 app.get('/v1/wallpapers/:id', async (c) => {
-  const db = createPool(c.env);
+  const db = createDb(c.env);
   const item = await getWallpaper(db, c.req.param('id'));
   if (!item) {
     return c.json({ error: { code: 'not_found', message: 'Wallpaper not found or catalog not configured.' } }, 404);
   }
-  const variants = await db?.query(
+  const variants = await db?.prepare(
     `SELECT id, variant_key, mime_type, codec, width, height, fps, size_bytes, sha256
      FROM media_variants WHERE wallpaper_id = $1 AND processing_state = 'ready'
      ORDER BY width DESC, height DESC`,
-    [item.id],
-  );
-  return c.json({ item, variants: variants?.rows ?? [] });
+  ).bind(item.id).all();
+  return c.json({ item, variants: variants?.results ?? [] });
 });
 
 app.get('/v1/categories', async (c) => {
-  const db = createPool(c.env);
+  const db = createDb(c.env);
   const items = (await listCategories(db)) ?? [];
   return c.json({ items });
 });
@@ -76,23 +75,21 @@ app.get('/v1/search', async (c) => {
   }
   const limit = parseLimit(c.req.query('limit'));
   if (limit === null) return c.json({ error: { code: 'invalid_request', message: 'limit must be a positive integer.' } }, 400);
-  const db = createPool(c.env);
+  const db = createDb(c.env);
   const items = (await searchWallpapers(db, q, limit)) ?? [];
   return c.json({ items, nextCursor: null });
 });
 
 app.post('/v1/assets/:variantId/authorize-download', async (c) => {
-  const db = createPool(c.env);
+  const db = createDb(c.env);
   if (!db) {
     return c.json({ error: { code: 'not_configured', message: 'Database not configured.' } }, 501);
   }
-  const variant = await db.query(
+  const row = await db.prepare(
     `SELECT mv.id, mv.object_key, w.premium, w.visibility, mv.processing_state
      FROM media_variants mv JOIN wallpapers w ON w.id = mv.wallpaper_id
-     WHERE mv.id = $1`,
-    [c.req.param('variantId')],
-  );
-  const row = variant.rows[0];
+     WHERE mv.id = ?`,
+  ).bind(c.req.param('variantId')).first<{ id: string; object_key: string; premium: number; visibility: string; processing_state: string }>();
   if (!row || row.visibility !== 'published' || row.processing_state !== 'ready') {
     return c.json({ error: { code: 'not_found', message: 'Variant not found.' } }, 404);
   }

@@ -1,33 +1,11 @@
-import { Pool } from 'pg';
-
-// PostgreSQL via Hyperdrive (spec section 12). In Workers, the
-// Hyperdrive binding is passed as the connection string; locally,
-// DATABASE_URL is used. If neither is configured, every query
-// function returns null and the API honestly reports an empty
-// catalog instead of inventing content.
-
-export type HyperdriveBinding = { connectionString: string };
-
 export type DatabaseBindings = {
-  // Hyperdrive is used in Workers. DATABASE_URL is only for local development
-  // and must be supplied through .dev.vars rather than wrangler.jsonc.
-  HYPERDRIVE?: HyperdriveBinding;
-  DATABASE_URL?: string;
+  DB?: D1Database;
 };
 
-export type Db = Pool | null;
+export type Db = D1Database | null;
 
-const pools = new Map<string, Pool>();
-
-export function createPool(bindings: DatabaseBindings): Db {
-  const connectionString = bindings.HYPERDRIVE?.connectionString ?? bindings.DATABASE_URL;
-  if (!connectionString) return null;
-  let pool = pools.get(connectionString);
-  if (!pool) {
-    pool = new Pool({ connectionString, max: 5 });
-    pools.set(connectionString, pool);
-  }
-  return pool;
+export function createDb(bindings: DatabaseBindings): Db {
+  return bindings.DB ?? null;
 }
 
 export type WallpaperRow = {
@@ -40,47 +18,34 @@ export type WallpaperRow = {
   created_at: string;
 };
 
-export async function listWallpapers(
-  db: Db,
-  limit: number,
-  category?: string,
-): Promise<WallpaperRow[] | null> {
+function wallpaper(row: Record<string, unknown>): WallpaperRow {
+  return { ...row, premium: Boolean(row.premium) } as WallpaperRow;
+}
+
+export async function listWallpapers(db: Db, limit: number, category?: string): Promise<WallpaperRow[] | null> {
   if (!db) return null;
-  const params: unknown[] = [limit];
-  let sql = `SELECT id, title, description, kind, visibility, premium, created_at
-    FROM wallpapers WHERE visibility = 'published'`;
-  if (category) {
-    sql += ` AND id IN (SELECT wallpaper_id FROM wallpaper_categories WHERE category_id = $2)`;
-    params.push(category);
-  }
-  sql += ` ORDER BY created_at DESC, id DESC LIMIT $1`;
-  const result = await db.query(sql, params);
-  return result.rows as WallpaperRow[];
+  const query = category
+    ? "SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' AND id IN (SELECT wallpaper_id FROM wallpaper_categories WHERE category_id = ?) ORDER BY created_at DESC, id DESC LIMIT ?"
+    : "SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' ORDER BY created_at DESC, id DESC LIMIT ?";
+  const statement = category ? db.prepare(query).bind(category, limit) : db.prepare(query).bind(limit);
+  const result = await statement.all<Record<string, unknown>>();
+  return result.results.map(wallpaper);
 }
 
 export async function getWallpaper(db: Db, id: string): Promise<WallpaperRow | null> {
   if (!db) return null;
-  const result = await db.query(
-    `SELECT id, title, description, kind, visibility, premium, created_at
-     FROM wallpapers WHERE id = $1 AND visibility = 'published'`,
-    [id],
-  );
-  return (result.rows[0] as WallpaperRow | undefined) ?? null;
+  const row = await db.prepare("SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE id = ? AND visibility = 'published'").bind(id).first<Record<string, unknown>>();
+  return row ? wallpaper(row) : null;
 }
 
 export async function listCategories(db: Db): Promise<{ id: string; slug: string; display_name: string }[] | null> {
   if (!db) return null;
-  const result = await db.query(`SELECT id, slug, display_name FROM categories ORDER BY display_name ASC`);
-  return result.rows as { id: string; slug: string; display_name: string }[];
+  const result = await db.prepare("SELECT id, slug, display_name FROM categories ORDER BY display_name ASC").all<{ id: string; slug: string; display_name: string }>();
+  return result.results;
 }
 
 export async function searchWallpapers(db: Db, q: string, limit: number): Promise<WallpaperRow[] | null> {
   if (!db) return null;
-  const result = await db.query(
-    `SELECT id, title, description, kind, visibility, premium, created_at
-     FROM wallpapers WHERE visibility = 'published' AND title ILIKE $1
-     ORDER BY created_at DESC, id DESC LIMIT $2`,
-    [`%${q}%`, limit],
-  );
-  return result.rows as WallpaperRow[];
+  const result = await db.prepare("SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' AND title LIKE ? ORDER BY created_at DESC, id DESC LIMIT ?").bind(`%${q}%`, limit).all<Record<string, unknown>>();
+  return result.results.map(wallpaper);
 }

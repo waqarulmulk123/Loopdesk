@@ -16,6 +16,7 @@
   "env": {
     "staging": {
       "name": "live-wallpaper-studio-api-staging",
+      "d1_databases": [{ "binding": "DB", "database_name": "live-wallpaper-studio-staging", "database_id": "5ab5270c-ac52-45c1-aaaf-7cc0b4cee355", "migrations_dir": "../database/migrations-d1" }],
       "vars": { "WORKER_ENVIRONMENT": "staging" },
       "queues": { "producers": [{ "binding": "INGEST_QUEUE", "queue": "live-wallpaper-media-ingest-staging" }] },
       "r2_buckets": [
@@ -25,6 +26,7 @@
     },
     "production": {
       "name": "live-wallpaper-studio-api",
+      "d1_databases": [{ "binding": "DB", "database_name": "live-wallpaper-studio", "database_id": "1bc16733-bcde-45fb-94ed-9af6f7a01bd6", "migrations_dir": "../database/migrations-d1" }],
       "vars": { "WORKER_ENVIRONMENT": "production" },
       "queues": { "producers": [{ "binding": "INGEST_QUEUE", "queue": "live-wallpaper-media-ingest" }] },
       "r2_buckets": [
