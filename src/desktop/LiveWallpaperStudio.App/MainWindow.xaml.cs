@@ -30,6 +30,7 @@ public sealed partial class MainWindow : Window
         if (args.SelectedItem is not NavigationViewItem item) return;
         Type? page = item.Tag switch
         {
+            "Onboarding" => typeof(OnboardingPage),
             "Home" => typeof(HomePage),
             "Library" => typeof(LibraryPage),
             "Discover" => typeof(DiscoverPage),
