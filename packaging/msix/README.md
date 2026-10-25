@@ -1,5 +1,10 @@
 # Packaging — M5, not yet complete
 
+The supplied Loopdesk artwork is included as `Assets/StoreLogo.png`,
+`Assets/Square150x150Logo.png`, and `Assets/Square44x44Logo.png`. The package
+identity must still be replaced with the publisher's real signing identity
+before an MSIX can be built.
+
 ## Store (MSIX)
 
 - Package identity, Store-managed updates, and framework dependencies
