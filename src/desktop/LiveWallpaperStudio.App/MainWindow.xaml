@@ -22,7 +22,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <TextBlock Text="Loopdesk" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
                     <TextBlock Text="/" Foreground="#FF50617F" />
-                    <TextBlock Text="Home" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                    <TextBlock x:Name="BreadcrumbPage" Text="Home" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Border Background="#FF102942" BorderBrush="#FF1E5E83" BorderThickness="1" CornerRadius="16" Padding="14,6">
@@ -67,6 +67,6 @@
                 <TextBlock Text="Loopdesk for Windows" Foreground="#FF667A9C" FontSize="11" />
             </StackPanel>
         </NavigationView.PaneFooter>
-        <Frame x:Name="ContentFrame" />
+        <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" />
     </NavigationView>
 </Window>

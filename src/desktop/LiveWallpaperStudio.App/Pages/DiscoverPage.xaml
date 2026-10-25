@@ -2,99 +2,96 @@
     x:Class="LiveWallpaperStudio.App.Pages.DiscoverPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Padding="28" RowSpacing="20">
-        <Grid.Transitions>
-            <TransitionCollection>
-                <EntranceThemeTransition />
-            </TransitionCollection>
-        </Grid.Transitions>
+    <Grid Padding="46,34,46,26" Background="{StaticResource ShellBackgroundBrush}" RowSpacing="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid ColumnSpacing="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Spacing="4">
-                <TextBlock Text="Discover wallpapers" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="Pick a scene, download once, and apply it when you are ready." Opacity="0.72" />
+        <Grid>
+            <StackPanel Spacing="8">
+                <TextBlock Text="EXPLORE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="12" FontWeight="SemiBold" CharacterSpacing="170" />
+                <TextBlock Text="Discover" FontSize="40" FontWeight="SemiBold" />
+                <TextBlock Text="Find beautiful video wallpapers from the online catalog." Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="16" />
             </StackPanel>
-            <Border Grid.Column="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="14,8" VerticalAlignment="Center">
-                <TextBlock Text="{x:Bind ViewModel.CatalogStatus, Mode=OneWay}" MaxWidth="360" TextTrimming="CharacterEllipsis" />
-            </Border>
+            <Button Content="Refresh catalog" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" />
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search scenes, moods, and themes" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                <Button Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />
-                <Button Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
-                <Button Content="Favourite" Command="{x:Bind ViewModel.ToggleFavouriteCommand}" />
-                <Button Content="Download" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />
-                <Button Content="Apply" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.ApplySelectedCommand}" />
+        <StackPanel Grid.Row="1" Spacing="18">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search titles and themes" VerticalContentAlignment="Center" />
+                <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="All" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="18,7" />
+                <Button Content="Nature" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Nature" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
+                <Button Content="Space" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Space" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
+                <Button Content="Abstract" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Abstract" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
+                <Button Content="Technology" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Technology" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
             </StackPanel>
-        </Grid>
+        </StackPanel>
 
-        <Grid Grid.Row="2" ColumnSpacing="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <GridView ItemsSource="{x:Bind ViewModel.CatalogItems, Mode=OneWay}"
-                      SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
-                      SelectionMode="Single"
-                      IsItemClickEnabled="True"
-                      ShowsScrollingPlaceholders="True">
-                <GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsWrapGrid ItemWidth="250" ItemHeight="220" />
-                    </ItemsPanelTemplate>
-                </GridView.ItemsPanel>
-                <GridView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Width="238" Height="208" Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="8">
-                            <Grid RowSpacing="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="132" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Border CornerRadius="11" Background="{StaticResource PremiumSurfaceBrush}">
-                                    <Image Stretch="UniformToFill">
-                                        <Image.Source>
-                                            <BitmapImage UriSource="{Binding PosterUri}" DecodePixelWidth="300" DecodePixelType="Logical" />
-                                        </Image.Source>
-                                    </Image>
-                                </Border>
-                                <StackPanel Grid.Row="1" Spacing="2">
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Subtitle}" Opacity="0.68" FontSize="12" />
+        <GridView Grid.Row="2"
+                  Margin="0,0,0,4"
+                  ItemsSource="{x:Bind ViewModel.CatalogItems, Mode=OneWay}"
+                  SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
+                  SelectionMode="Single"
+                  IsItemClickEnabled="True"
+                  ShowsScrollingPlaceholders="True">
+            <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsWrapGrid ItemWidth="300" ItemHeight="282" />
+                </ItemsPanelTemplate>
+            </GridView.ItemsPanel>
+            <GridView.ItemTemplate>
+                <DataTemplate>
+                    <Border Width="284" Height="266" Background="{StaticResource PremiumCardBrush}" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14">
+                        <Grid RowSpacing="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="166" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Image Stretch="UniformToFill">
+                                <Image.Source>
+                                    <BitmapImage UriSource="{Binding PosterUri}" DecodePixelWidth="360" DecodePixelType="Logical" />
+                                </Image.Source>
+                            </Image>
+                            <Grid Grid.Row="1" Padding="18,14,18,12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                    <Border Background="#FF0D494A" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0">
+                                        <TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" />
+                                    </Border>
                                 </StackPanel>
+                                <Border Width="42" Height="30" Background="#FF334C79" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                    <TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                </Border>
                             </Grid>
-                        </Border>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
-            </GridView>
-
-            <Border Grid.Column="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="20" Padding="14" VerticalAlignment="Top">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Selected wallpaper" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <Border Height="190" CornerRadius="12" Background="{StaticResource PremiumSurfaceBrush}">
-                        <Image Source="{x:Bind ViewModel.SelectedItem.PosterUri, Mode=OneWay}" Stretch="UniformToFill" />
+                        </Grid>
                     </Border>
-                    <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
-                    <TextBlock Text="{x:Bind ViewModel.SelectedItem.Subtitle, Mode=OneWay}" Opacity="0.72" TextWrapping="Wrap" />
-                    <Button Content="Save favourite" Command="{x:Bind ViewModel.ToggleFavouriteCommand}" />
-                    <TextBlock Text="Download keeps a verified local copy. Apply only changes the desktop after it is ready." Opacity="0.65" TextWrapping="Wrap" />
-                </StackPanel>
-            </Border>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+            <GridView.Footer>
+                <TextBlock Text="{x:Bind ViewModel.CatalogStatus, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" Margin="10,14" TextWrapping="Wrap" />
+            </GridView.Footer>
+        </GridView>
+
+        <Grid Grid.Row="3" ColumnSpacing="14">
+            <StackPanel Spacing="3">
+                <TextBlock Text="Selected wallpaper" FontSize="20" FontWeight="SemiBold" />
+                <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Content="Download selected" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />
+                <Button Content="Apply selected" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ApplySelectedCommand}" />
+            </StackPanel>
         </Grid>
     </Grid>
 </Page>
