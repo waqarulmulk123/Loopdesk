@@ -13,54 +13,65 @@ public sealed partial class LibraryViewModel : ObservableObject
     private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private string? _selectedMedia;
+    private DownloadedWallpaper? _selectedMedia;
 
     [ObservableProperty]
     private string _status = string.Empty;
 
-    public ObservableCollection<string> LocalMedia { get; } = new();
-
-    public string MediaFolder => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "LiveWallpaperStudio", "media");
+    public ObservableCollection<DownloadedWallpaper> Wallpapers { get; } = new();
 
     [RelayCommand]
     private void Refresh()
     {
-        LocalMedia.Clear();
-        if (!Directory.Exists(MediaFolder)) return;
+        Wallpapers.Clear();
         string query = SearchText.Trim();
-        foreach (string file in Directory.EnumerateFiles(MediaFolder, "*.mp4", SearchOption.TopDirectoryOnly))
+        foreach (DownloadedWallpaper wallpaper in DownloadedWallpaperService.Instance.List())
         {
-            if (string.IsNullOrEmpty(query) || Path.GetFileName(file).Contains(query, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(query) || wallpaper.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
             {
-                LocalMedia.Add(file);
+                Wallpapers.Add(wallpaper);
             }
         }
-        foreach (string file in CatalogService.Load().Select(item => item.LocalVideoPath).OfType<string>())
-        {
-            if ((string.IsNullOrEmpty(query) || Path.GetFileName(file).Contains(query, StringComparison.OrdinalIgnoreCase)) &&
-                !LocalMedia.Contains(file))
-            {
-                LocalMedia.Add(file);
-            }
-        }
+        SelectedMedia = Wallpapers.FirstOrDefault();
+        Status = Wallpapers.Count == 0
+            ? "No cloud downloads yet. Choose a wallpaper in Discover first."
+            : $"{Wallpapers.Count} protected cloud download(s) available.";
     }
 
     [RelayCommand]
     private void Search() => Refresh();
 
+    public string? PreparePreview()
+    {
+        if (SelectedMedia is null)
+        {
+            Status = "Select a downloaded wallpaper first.";
+            return null;
+        }
+        try
+        {
+            Status = $"Previewing {SelectedMedia.Title}.";
+            return DownloadedWallpaperService.Instance.CreatePlaybackCopy(SelectedMedia);
+        }
+        catch (System.Security.Cryptography.CryptographicException)
+        {
+            Status = "This protected download belongs to a different Windows account. Download it again from Discover.";
+            return null;
+        }
+        catch (Exception)
+        {
+            Status = "The protected download could not be opened. Download it again from Discover.";
+            return null;
+        }
+    }
+
     [RelayCommand]
     private void ApplySelected()
     {
-        if (string.IsNullOrWhiteSpace(SelectedMedia) || !File.Exists(SelectedMedia))
-        {
-            Status = "Select a local MP4 file first.";
-            return;
-        }
-
-        Status = RenderSupervisor.Instance.Start(SelectedMedia)
-            ? "Wallpaper applied."
-            : $"Could not start renderer: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
+        string? playbackPath = PreparePreview();
+        if (playbackPath is null) return;
+        Status = RenderSupervisor.Instance.Start(playbackPath)
+            ? $"Applied {SelectedMedia!.Title}."
+            : $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
     }
 }

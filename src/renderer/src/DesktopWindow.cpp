@@ -6,6 +6,8 @@ namespace {
 const wchar_t kClassName[] = L"LwsWallpaperWindow";
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+    if (msg == WM_NCHITTEST) return HTTRANSPARENT;
+    if (msg == WM_MOUSEACTIVATE) return MA_NOACTIVATE;
     if (msg == WM_DESTROY) {
         PostQuitMessage(0);
         return 0;
@@ -43,7 +45,7 @@ bool DesktopWindow::Create(HMONITOR monitor, int width, int height) {
     // WS_POPUP without WS_EX_TOPMOST: the shell adapter decides parenting.
     // The window must never be shown topmost on its own.
     hwnd_ = CreateWindowExW(
-        0, kClassName, L"", WS_POPUP | WS_VISIBLE,
+        WS_EX_NOACTIVATE, kClassName, L"", WS_POPUP | WS_VISIBLE,
         x, y, width, height,
         nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd_) return false;

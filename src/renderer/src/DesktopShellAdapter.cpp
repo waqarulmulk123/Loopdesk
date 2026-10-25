@@ -39,7 +39,7 @@ BOOL CALLBACK EnumTopWindows(HWND hwnd, LPARAM param) {
 
 }  // namespace
 
-DesktopAttachResult DesktopShellAdapter::TryAttach(HWND wallpaperHwnd, HMONITOR /*monitor*/) {
+DesktopAttachResult DesktopShellAdapter::TryAttach(HWND wallpaperHwnd, HMONITOR monitor) {
     DesktopAttachResult result;
     if (!wallpaperHwnd || !IsWindow(wallpaperHwnd)) {
         result.diagnostics = L"Invalid wallpaper window handle.";
@@ -83,9 +83,25 @@ DesktopAttachResult DesktopShellAdapter::TryAttach(HWND wallpaperHwnd, HMONITOR 
         return result;
     }
 
-    SetWindowPos(wallpaperHwnd, nullptr, 0, 0, 0, 0,
-                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-                 SWP_NOACTIVATE);
+    // Child coordinates are relative to WorkerW, while monitor coordinates
+    // are screen-relative. Convert the selected monitor's physical bounds so
+    // a scaled or offset desktop does not render only on the left side.
+    MONITORINFO monitorInfo{};
+    monitorInfo.cbSize = sizeof(monitorInfo);
+    POINT hostOrigin{0, 0};
+    ClientToScreen(state.hostWorker, &hostOrigin);
+    if (!monitor || !GetMonitorInfoW(monitor, &monitorInfo)) {
+        SetParent(wallpaperHwnd, nullptr);
+        SetWindowLongPtrW(wallpaperHwnd, GWL_STYLE, originalStyle);
+        result.diagnostics = L"Could not resolve monitor bounds after shell attachment.";
+        return result;
+    }
+    const int width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+    const int height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+    const int x = monitorInfo.rcMonitor.left - hostOrigin.x;
+    const int y = monitorInfo.rcMonitor.top - hostOrigin.y;
+    SetWindowPos(wallpaperHwnd, HWND_BOTTOM, x, y, width, height,
+                 SWP_FRAMECHANGED | SWP_NOACTIVATE);
 
     result.success = true;
     result.hostWindow = state.hostWorker;
