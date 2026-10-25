@@ -28,7 +28,10 @@
     <Content Include="..\..\..\packaging\msix\Assets\StoreLogo.png" Link="Assets\StoreLogo.png" />
     <Content Include="..\..\..\packaging\msix\Assets\Square150x150Logo.png" Link="Assets\Square150x150Logo.png" />
     <Content Include="..\..\..\packaging\msix\Assets\Square44x44Logo.png" Link="Assets\Square44x44Logo.png" />
-    <Content Include="..\..\..\build\renderer\Release\lws-renderer.exe" Link="lws-renderer.exe" Condition="Exists('..\..\..\build\renderer\Release\lws-renderer.exe')" />
+    <Content Include="..\..\..\build\renderer\Release\lws-renderer.exe" Link="lws-renderer.exe" Condition="Exists('..\..\..\build\renderer\Release\lws-renderer.exe')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <!-- Keep the offline catalog and its media beside every build/publish output. -->
     <Content Include="..\..\..\assets\**\*">
       <Link>assets\%(RecursiveDir)%(Filename)%(Extension)</Link>

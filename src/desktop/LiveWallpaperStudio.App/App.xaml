@@ -8,18 +8,19 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
-            <!-- Premium design system (see docs/UI_UX.md). Dark, calm,
-                 high-contrast, generous spacing. Accent is used sparingly:
-                 primary actions only, never as a background wash. -->
-            <Color x:Key="PremiumAccentColor">#FF7C5CFF</Color>
-            <Color x:Key="PremiumAccentLightColor">#FF9D8CFF</Color>
-            <Color x:Key="PremiumGoldColor">#FFFFC94D</Color>
-            <Color x:Key="PremiumCardColor">#FF1E1E24</Color>
+            <!-- The gallery uses deep blue-black surfaces so the artwork, not
+                 the chrome, is the focal point. -->
+            <Color x:Key="PremiumAccentColor">#FF57D5F6</Color>
+            <Color x:Key="PremiumAccentLightColor">#FFB7F3FF</Color>
+            <Color x:Key="PremiumGoldColor">#FFFFD166</Color>
+            <Color x:Key="PremiumCardColor">#FF17202B</Color>
+            <Color x:Key="PremiumSurfaceColor">#FF0C121B</Color>
             <Color x:Key="PremiumTextPrimaryColor">#FFFFFFFF</Color>
             <Color x:Key="PremiumTextSecondaryColor">#FFB8B8C0</Color>
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="{StaticResource PremiumAccentColor}" />
             <SolidColorBrush x:Key="PremiumGoldBrush" Color="{StaticResource PremiumGoldColor}" />
             <SolidColorBrush x:Key="PremiumCardBrush" Color="{StaticResource PremiumCardColor}" />
+            <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="{StaticResource PremiumSurfaceColor}" />
             <SolidColorBrush x:Key="PremiumTextSecondaryBrush" Color="{StaticResource PremiumTextSecondaryColor}" />
             <CornerRadius x:Key="PremiumCardCornerRadius">12,12,12,12</CornerRadius>
             <CornerRadius x:Key="PremiumButtonCornerRadius">8,8,8,8</CornerRadius>

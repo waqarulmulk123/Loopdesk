@@ -2,17 +2,12 @@
     x:Class="LiveWallpaperStudio.App.Pages.DownloadsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Padding="24">
+    <Grid Padding="28">
         <Grid.Transitions>
             <TransitionCollection>
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
-        <StackPanel Spacing="12">
-            <TextBlock Text="Downloads" Style="{StaticResource TitleTextBlockStyle}" />
-            <TextBlock Text="Downloaded files in %LOCALAPPDATA%\LiveWallpaperStudio\downloads." TextWrapping="Wrap" />
-            <Button Content="Refresh downloads" Command="{x:Bind ViewModel.RefreshCommand}" />
-            <ListView ItemsSource="{x:Bind ViewModel.Downloads, Mode=OneWay}" />
-        </StackPanel>
+        <Grid RowSpacing="18"><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel Spacing="4"><TextBlock Text="Downloads" Style="{StaticResource TitleTextBlockStyle}" /><TextBlock Text="Verified wallpaper files available on this PC." Opacity="0.72" /></StackPanel><Button Content="Refresh downloads" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{x:Bind ViewModel.RefreshCommand}" /></Grid><Border Grid.Row="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="18" Padding="16"><StackPanel Spacing="10"><TextBlock Text="No completed files are shown until a wallpaper has finished downloading." Opacity="0.62" /><ListView ItemsSource="{x:Bind ViewModel.Downloads, Mode=OneWay}" /></StackPanel></Border></Grid>
     </Grid>
 </Page>
