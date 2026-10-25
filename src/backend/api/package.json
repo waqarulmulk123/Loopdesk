@@ -6,7 +6,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "build": "tsc",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --env production",
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
     "dev": "wrangler dev --local",
