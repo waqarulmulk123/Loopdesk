@@ -66,10 +66,10 @@ npm ci
 npm run typecheck
 npm test
 ```
-The deployed staging and production Workers have D1 and published-R2 bindings. The desktop defaults to the production `workers.dev` API endpoint; the catalog is intentionally empty until a licensed, locally prepared MP4 has been directly published. Clear the API URL in Settings for offline-only mode.
+The deployed staging and production Workers have D1 and published-R2 bindings. Production currently contains five owned, free Loopdesk H.264 MP4 wallpapers. The desktop defaults to the production `workers.dev` API endpoint: select a free item in Discover, download it with SHA-256/size verification, then apply it. Clear the API URL in Settings for offline-only mode.
 
 ## What is complete, and what is not
 
-Complete in code for local development: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, download manager, cache, IPC validation, SQLite schema), Workers API (D1 catalog queries, public download authorization, authenticated direct publishing of locally prepared non-premium MP4 files), MSIX manifest template, CI workflow, docs and test plan.
+Complete in code: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, integrity-checked download manager, cache, IPC validation, SQLite schema), Workers API (D1 catalog queries, public download authorization, authenticated direct publishing of locally prepared non-premium MP4 files), MSIX manifest template, CI workflow, docs and test plan.
 
 Still P1 / not implemented: WebView2 interactive wallpapers, playlists, premium sync, account favourites, and a signed installer. Still not verified: every Windows build, desktop-attachment, multi-monitor and physical acceptance test in `docs/TEST_PLAN.md` — run those on real Windows before any release claim.
