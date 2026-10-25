@@ -11,8 +11,8 @@ is actually true on real Windows hardware. GitHub Actions verifies the desktop b
 - [ ] Offline launch and previously downloaded media playback verified
 - [ ] SQLite persistent settings/cache survive reboots and crash scenarios
 - [ ] Download manager tested with real Range/ETag/cancellation/checksum behaviour
-- [ ] Workers API deployed to staging, D1 schema migrated, real R2 object retrieved
-- [ ] Catalog filters and authorised-download flows work when API is configured
+- [x] Workers API deployed to production, D1 schema migrated, and five real R2 objects retrieved and size-verified (2026-10-25)
+- [x] Published catalog and authorised free-download flow work through the configured `workers.dev` API (2026-10-25)
 - [ ] At least one admin upload → transcode → validate → publish workflow tested end-to-end
 - [ ] Required unit, integration and shell acceptance tests pass, results archived with dates/build numbers
 - [ ] App and renderer do not require elevated privileges during normal playback
