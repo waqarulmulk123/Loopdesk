@@ -8,6 +8,7 @@ obj/
 .dev.vars
 .wrangler/
 .cf-build-*/
+worker-configuration.d.ts
 node_modules/
 dist/
 artifacts/

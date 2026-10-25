@@ -10,7 +10,7 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 | M1 — Minimal real desktop video wallpaper | Code written, NOT tested on Windows | D3D11 device, display enumeration, pause policy, per-monitor window, swap-chain presenter, Media Foundation frame-server player, WorkerW shell adapter, named-pipe IPC server. Gate (visible video behind icons) not met yet. |
 | M2 — Reliable engine, multi-monitor | Code written, NOT tested on Windows | Display model (device, bounds, DPI, primary), IPC handler wired into the render loop, bootstrap/sample/test scripts. Explorer-restart re-attachment and device-loss recreation are coded as re-attach/recreate paths, not yet proven on Windows. Gate not met yet. |
 | M3 — Full offline Windows application | Code written, NOT tested on Windows | WinUI 3 app, MVVM view model, renderer supervisor, IPC client, settings, download manager, cache rules, SQLite schema. Tray, library/displays views and MSIX packaging project are notes/skeleton only. Gate not met yet. |
-| M4 — Real Cloudflare backend | API deployed; processor requires Workers Paid | Staging and production API Workers, D1 databases, R2 buckets, ingest/dead-letter Queues, Queue consumers, token-protected admin workflow, and Workers.dev media delivery are deployed. The FFmpeg processor image builds and runs locally, but Cloudflare Container instances cannot run until this account has Workers Paid access. No custom CDN domain, licensed catalog content, or premium entitlement provider is deployed. |
+| M4 — Free Cloudflare backend | Direct-publish API ready | Staging and production API Workers, D1 databases, published R2 buckets, token-protected direct MP4 publishing, and Workers.dev media delivery are configured. Media is prepared with local FFmpeg and uploaded as pre-encoded H.264 MP4; no paid Cloudflare Container or Queue consumer is required. No custom CDN domain, licensed catalog content, or premium entitlement provider is deployed. |
 | M5 — Production UX, security, install, tests | Docs written, NOT verified | Release checklist, test plan, API, security and deployment docs, packaging notes. No installer, signing workflow or release evidence yet. Gate not met yet. |
 | M6 — P1 extensions | Not started | WebView2 interactive wallpapers, playlists, premium sync — documented as not implemented, not shown as enabled features. |
 
@@ -27,7 +27,7 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 
 ## What is NOT done
 
-- The Cloudflare Container processor source and Docker image are verified locally, but Cloudflare Container execution is blocked by the account's missing Workers Paid entitlement; queued media cannot become published variants until that plan is enabled.
+- The free media workflow accepts only locally prepared H.264 MP4 files. Automatic cloud transcoding is deliberately disabled because it requires paid compute.
 - The desktop Discover screen consumes the configured HTTPS API catalog; applying an online item and account/premium workflows remain incomplete.
 - No licensed media has been ingested or published.
 - No installer has been built or signed.
@@ -38,4 +38,4 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 
 - A real Windows machine with supported graphics/display hardware is required for desktop-attachment, playback, display-change, and Explorer-restart acceptance tests.
 - Code signing requires a certificate/account owned by the release publisher.
-- Container/external-runner access is required for FFmpeg processing; Workers cannot execute FFmpeg in an HTTP request.
+- No automatic cloud transcoding is available on the free tier; creators prepare video locally with FFmpeg before upload.
