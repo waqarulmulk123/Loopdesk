@@ -8,8 +8,8 @@
 //                                    exits with ShellAttachmentUnsupported
 //                                    behaviour (code 2) — it never shows
 //                                    a topmost fake wallpaper.
-// M1 is in progress: this code has not yet passed the M1 gate on a
-// real Windows desktop, and must not be described as working until it does.
+// M1 desktop attachment/playback has been physically verified on one Windows
+// configuration. Multi-monitor and Explorer-restart validation remain M2.
 
 #include <atomic>
 #include <iostream>
@@ -33,7 +33,9 @@ std::atomic<bool> g_paused{false};
 std::atomic<bool> g_shutdownRequested{false};
 
 std::string IpcHandler(const std::string& method, const std::string& request) {
-    std::string requestId = lws::ExtractJsonString(request, "requestId");
+    std::string requestId;
+    lws::TryExtractJsonString(request, "requestId", &requestId);
+    requestId = lws::EscapeJsonString(requestId);
     std::string state = "Playing";
     if (g_paused.load()) state = "Paused";
     if (method == "engine.hello") {
@@ -173,7 +175,7 @@ int main(int argc, char** argv) {
     // Windows virtualizes GetMonitorInfo/GetSystemMetrics on scaled displays,
     // producing a wallpaper that covers only part of the desktop.
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-    std::cout << "LiveWallpaperStudio renderer (M1 in progress)\n";
+    std::cout << "LiveWallpaperStudio renderer\n";
     std::cout << "Displays found: " << lws::ListDisplays() << "\n";
 
     if (argc >= 3 && std::string(argv[1]) == "--video") {
