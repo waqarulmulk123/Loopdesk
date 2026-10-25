@@ -21,9 +21,6 @@ public sealed partial class DiscoverViewModel : ObservableObject
     [ObservableProperty]
     private DiscoverItem? _selectedItem;
 
-    [ObservableProperty]
-    private string _selectedCategory = "All";
-
     public ObservableCollection<DiscoverItem> CatalogItems { get; } = new();
 
     private List<OnlineCatalogItem> _allItems = new();
@@ -58,43 +55,25 @@ public sealed partial class DiscoverViewModel : ObservableObject
         ApplySearch();
     }
 
-    [RelayCommand]
-    private void SelectCategory(string? category)
-    {
-        SelectedCategory = string.IsNullOrWhiteSpace(category) ? "All" : category;
-        ApplySearch();
-    }
-
     private void ApplySearch()
     {
         CatalogItems.Clear();
         string query = SearchText.Trim();
         foreach (var item in _allItems)
         {
-            string category = CategoryFor(item.Id);
             bool matchesQuery = string.IsNullOrEmpty(query) ||
                 item.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 item.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
-                item.Kind.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                category.Contains(query, StringComparison.OrdinalIgnoreCase);
-            if (matchesQuery && (SelectedCategory == "All" || category == SelectedCategory))
+                item.Kind.Contains(query, StringComparison.OrdinalIgnoreCase);
+            if (matchesQuery)
             {
-                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, category, item.Premium,
+                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, "Loopdesk Originals", item.Premium,
                     DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), PosterFor(item.Id)));
             }
         }
         if (SelectedItem is null && CatalogItems.Count > 0)
             SelectedItem = CatalogItems[0];
     }
-
-    private static string CategoryFor(string id) => id switch
-    {
-        "theme-loopdesk-aurora-dreamscape" => "Nature",
-        "theme-loopdesk-cosmic-infinity" => "Space",
-        "theme-loopdesk-liquid-neon-flow" => "Abstract",
-        "theme-loopdesk-bioluminescent-ocean" => "Nature",
-        _ => "Technology",
-    };
 
     private static string PosterFor(string id)
     {

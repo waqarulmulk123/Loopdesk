@@ -28,13 +28,7 @@
                 <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search titles and themes" VerticalContentAlignment="Center" />
                 <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
             </Grid>
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <Button Content="All" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="18,7" />
-                <Button Content="Nature" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Nature" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
-                <Button Content="Space" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Space" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
-                <Button Content="Abstract" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Abstract" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
-                <Button Content="Technology" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Technology" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="18,7" />
-            </StackPanel>
+            <TextBlock Text="Loopdesk Originals" Foreground="{StaticResource PremiumAccentBrush}" FontWeight="SemiBold" FontSize="13" />
         </StackPanel>
 
         <GridView Grid.Row="2"
@@ -89,6 +83,7 @@
                 <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Content="Save favourite" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ToggleFavouriteCommand}" />
                 <Button Content="Download selected" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />
                 <Button Content="Apply selected" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ApplySelectedCommand}" />
             </StackPanel>
