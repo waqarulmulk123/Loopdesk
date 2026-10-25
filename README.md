@@ -1,13 +1,12 @@
-# Live Wallpaper Studio
+# Loopdesk
 
-A native Windows live-wallpaper application. Working product name only — rename before release.
+A native Windows live-wallpaper application.
 
 ## What it is
 
-- WinUI 3 desktop app for browsing, importing and applying wallpapers
-- Native C++ renderer that plays video **behind desktop icons**, with multi-monitor support
-- Offline-first: imported and downloaded wallpapers play without internet
-- Optional Cloudflare-backed catalog: Workers + D1 + R2
+- WinUI 3 desktop app for browsing, downloading, previewing, and applying wallpapers
+- Native C++ renderer that plays video **behind desktop icons** on the primary display
+- Cloudflare-backed catalog: Workers + D1 + R2
 
 ## Finalized stack
 
@@ -58,7 +57,7 @@ The desktop product requires Windows CI and physical Windows validation for rele
 .\scripts\build-desktop.ps1
 .\scripts\test-all.ps1
 ```
-3. Put a local H.264 MP4 in `%LOCALAPPDATA%\LiveWallpaperStudio\media`, launch the WinUI app, select it in the Local library, and press Apply wallpaper.
+3. Launch the WinUI app, choose a free item in Discover, download it, then preview or apply it from My wallpapers.
 4. Backend (optional, staging only):
 ```powershell
 cd src\backend\api
@@ -70,6 +69,6 @@ The deployed staging and production Workers have D1 and published-R2 bindings. P
 
 ## What is complete, and what is not
 
-Complete in code: WinUI app (home, local library, displays, settings service, tray service, renderer supervisor, IPC client), native renderer (D3D11, Media Foundation, shell adapter, IPC server, pause policy), .NET Core services (settings, integrity-checked download manager, cache, IPC validation, SQLite schema), Workers API (D1 catalog queries, public download authorization, authenticated direct publishing of locally prepared non-premium MP4 files), MSIX manifest template, CI workflow, docs and test plan.
+Complete in code: WinUI cloud catalog and protected downloaded-wallpaper library, native primary-display renderer, integrity-checked Cloudflare downloads, and Workers API publishing for owned free MP4 files.
 
-Still P1 / not implemented: WebView2 interactive wallpapers, playlists, premium sync, account favourites, and a signed installer. Still not verified: every Windows build, desktop-attachment, multi-monitor and physical acceptance test in `docs/TEST_PLAN.md` — run those on real Windows before any release claim.
+Not implemented: multi-monitor assignment, wallpaper persistence after app exit, power/session pause integration, premium accounts/entitlements, interactive wallpapers, playlists, and a signed direct installer.
