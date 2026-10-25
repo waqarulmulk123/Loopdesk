@@ -1,6 +1,7 @@
 #include "lws/IpcServer.h"
 
-#include <array>
+#include <iostream>
+#include <vector>
 
 namespace lws {
 
@@ -31,14 +32,23 @@ void IpcServer::Run(Handler handler) {
             CloseHandle(pipe);
             continue;
         }
-        std::array<char, 1024 * 1024> buffer{};
+        // A 1 MiB request is part of the protocol limit, but the default
+        // Windows thread stack is also commonly 1 MiB. Keep this buffer on
+        // the heap so starting IPC cannot overflow the renderer thread.
+        std::vector<char> buffer(1024 * 1024);
         DWORD read = 0;
         if (ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size() - 1), &read, nullptr) && read > 0) {
             std::string request(buffer.data(), read);
             std::string method = ExtractJsonString(request, "method");
             std::string response = handler ? handler(method, request) : std::string{};
             DWORD written = 0;
-            WriteFile(pipe, response.data(), static_cast<DWORD>(response.size()), &written, nullptr);
+            if (!WriteFile(pipe, response.data(), static_cast<DWORD>(response.size()), &written, nullptr)) {
+                std::cerr << "IPC response write failed: " << GetLastError() << "\n";
+            } else if (!FlushFileBuffers(pipe)) {
+                std::cerr << "IPC response flush failed: " << GetLastError() << "\n";
+            }
+        } else {
+            std::cerr << "IPC request read failed: " << GetLastError() << "\n";
         }
         DisconnectNamedPipe(pipe);
         CloseHandle(pipe);

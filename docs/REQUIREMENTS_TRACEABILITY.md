@@ -7,9 +7,9 @@ Status definitions: **implemented** means source is present and automated checks
 | APP-001 | implemented | `src/desktop/LiveWallpaperStudio.App/` | Launch on a physical Windows target. |
 | APP-002 | implemented | `assets/wallpapers/`, library services | First-launch offline test. |
 | APP-003 | implemented | library view models and core cache services | Physical file-picker/import test. |
-| APP-004 | implemented | renderer shell adapter and supervisor | Behind-icons validation on Windows hardware. |
-| APP-005 | implemented | `VideoMediaFoundation.cpp` | Loop observation with real video. |
-| APP-006 | implemented | Media Foundation renderer path | H.264 decode test on target hardware. |
+| APP-004 | partially verified | WorkerW adapter passed `scripts/test-renderer-video-smoke.ps1` on Windows 10 / Intel HD Graphics 620 | Human visual validation that desktop icons remain usable. |
+| APP-005 | partially verified | Renderer presented advancing frames from the bundled real video (142 → 269) | Loop observation over a complete media duration. |
+| APP-006 | verified | Media Foundation decoded the bundled H.264 sample in the Windows renderer smoke test | Hardware compatibility matrix. |
 | APP-007 | implemented | `RenderSupervisor.cs`, IPC server | Renderer-kill recovery test. |
 | APP-008 | implemented | `DisplayManager.cpp`, displays view | Dual-display hot-plug test. |
 | APP-009 | implemented | presenter, protocol, display services | Per-monitor persistence test. |
