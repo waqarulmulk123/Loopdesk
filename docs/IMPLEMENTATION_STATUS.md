@@ -1,15 +1,15 @@
 # Implementation status — honest, by milestone
 
-Updated: 2026-10-25 — five owned free wallpapers published to Cloudflare; desktop online download/apply flow and Windows CI verified
+Updated: 2026-10-26 — cloud-only private desktop flow and physical WorkerW playback verified
 
 The source is on GitHub and the Cloudflare catalog infrastructure is deployed. GitHub Actions has passed the Windows build/startup job. This is not a desktop-product release: physical Windows acceptance tests, signed packaging, media processing, and entitlement integrations remain required.
 
 | Milestone | Status | Evidence / gap |
 |---|---|---|
 | M0 — Environment, source, feasibility | CI verified; physical validation pending | GitHub Actions builds the .NET components and native renderer, runs the .NET harness, and starts the renderer. |
-| M1 — Minimal real desktop video wallpaper | Verified structurally on Windows | On 2026-10-25, the Release renderer ran on Windows 10 x64 / Intel HD Graphics 620, exposed its real `LwsWallpaperWindow` as a child of a non-icon-hosting `WorkerW`, decoded/presented the owned H.264 sample (IPC frames 111 → 214), and shut down with exit 0. `scripts/test-renderer-desktop-attachment.ps1` reproduces this physical proof. A human click/drag observation remains the UI portion of the icon-interaction check. |
+| M1 — Minimal real desktop video wallpaper | Physical playback verified | On 2026-10-26, the Release renderer attached its real `LwsWallpaperWindow` to a non-icon-hosting `WorkerW`, decoded/presented the owned H.264 sample (IPC frames 122 → 221), and shut down with exit 0. `scripts/test-renderer-desktop-attachment.ps1` reproduces this proof. |
 | M2 — Reliable engine, multi-monitor | Single-monitor verified; multi-monitor pending | The renderer, IPC and display model are exercised on one 1920x1080 display. Explorer-restart, device-loss and true multi-monitor assignment require the corresponding physical display/event configurations. |
-| M3 — Full offline Windows application | CI verified; physical acceptance pending | WinUI 3 app, MVVM view model, renderer supervisor, IPC client, settings, download manager, cache rules and SQLite schema build in the Windows workflow. Discover downloads a selected free online MP4, verifies its SHA-256/size, caches it, and applies it through the renderer. Physical acceptance remains required. |
+| M3 — Windows application | Build and renderer acceptance verified | Discover is cloud-only. It downloads a selected free Cloudflare MP4, verifies SHA-256/size, protects it per Windows user with DPAPI, and exposes preview/apply only from My wallpapers. The UI never scans or displays drive paths. |
 | M4 — Free Cloudflare backend | Deployed and verified | Production Worker, D1 and R2 publish five owned free H.264 MP4s. Catalog listing, download authorization and a real 1 KiB `206` range response were verified on 2026-10-25. No paid Cloudflare Container, Queue or custom domain is required. |
 | M5 — Production UX, security, install, tests | CI verified; signing/physical install pending | Backend, processor and Windows desktop GitHub workflows passed for commit `43b4427`. A signed installer and clean-machine install evidence still require publisher-owned signing credentials and a physical test machine. |
 | M6 — P1 extensions | Not started | WebView2 interactive wallpapers, playlists, premium sync — documented as not implemented, not shown as enabled features. |
