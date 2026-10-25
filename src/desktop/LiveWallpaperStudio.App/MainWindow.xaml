@@ -8,7 +8,20 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <NavigationView x:Name="NavView" IsBackButtonVisible="Collapsed" SelectionChanged="NavView_SelectionChanged" Loaded="NavView_Loaded">
+    <NavigationView x:Name="NavView"
+                    IsBackButtonVisible="Collapsed"
+                    IsPaneToggleButtonVisible="False"
+                    PaneDisplayMode="Left"
+                    CompactPaneLength="64"
+                    OpenPaneLength="196"
+                    SelectionChanged="NavView_SelectionChanged"
+                    Loaded="NavView_Loaded">
+        <NavigationView.PaneHeader>
+            <StackPanel Orientation="Horizontal" Spacing="10" Padding="12,4,0,12">
+                <Image Source="ms-appx:///Assets/Loopdesk.png" Width="28" Height="28" />
+                <TextBlock Text="Loopdesk" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </StackPanel>
+        </NavigationView.PaneHeader>
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Home" Tag="Home" Icon="Home" />
             <NavigationViewItem Content="Library" Tag="Library" Icon="Folder" />

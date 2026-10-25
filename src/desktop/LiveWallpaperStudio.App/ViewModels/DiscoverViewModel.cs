@@ -68,9 +68,27 @@ public sealed partial class DiscoverViewModel : ObservableObject
                 item.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 item.Theme.Contains(query, StringComparison.OrdinalIgnoreCase))
             {
-                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, item.Theme, item.Premium, item.LocalVideoPath, item.Theme == "Online"));
+                CatalogItems.Add(new DiscoverItem(item.Id, item.Title, item.Theme, item.Premium, item.LocalVideoPath, item.Theme == "Online", PosterFor(item)));
             }
         }
+        if (SelectedItem is null && CatalogItems.Count > 0)
+            SelectedItem = CatalogItems[0];
+    }
+
+    private static string PosterFor(CatalogService.CatalogItem item)
+    {
+        if (!string.IsNullOrWhiteSpace(item.Poster))
+            return $"ms-appx:///{item.Poster.Replace('\\', '/')}";
+
+        string poster = item.Id switch
+        {
+            "theme-loopdesk-aurora-dreamscape" => "media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp",
+            "theme-loopdesk-cosmic-infinity" => "media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp",
+            "theme-loopdesk-liquid-neon-flow" => "media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp",
+            "theme-loopdesk-bioluminescent-ocean" => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp",
+            _ => "media-generation-poster-ocean-sunset-0-211d15cc-bd5b-47cb-82df-35df9f6d2098.webp"
+        };
+        return $"ms-appx:///assets/wallpapers/posters/{poster}";
     }
 
     [RelayCommand]
@@ -129,9 +147,23 @@ public sealed partial class DiscoverViewModel : ObservableObject
             ? $"Applied {SelectedItem.Title}."
             : $"Could not start renderer: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
     }
+
+    [RelayCommand]
+    private void ToggleFavourite()
+    {
+        if (SelectedItem is null)
+        {
+            CatalogStatus = "Select a wallpaper to save it to favourites.";
+            return;
+        }
+
+        CatalogStatus = FavouritesService.Toggle(SelectedItem.Id)
+            ? $"Saved {SelectedItem.Title} to favourites."
+            : $"Removed {SelectedItem.Title} from favourites.";
+    }
 }
 
-public sealed record DiscoverItem(string Id, string Title, string Theme, bool Premium, string? LocalPath, bool IsOnline)
+public sealed record DiscoverItem(string Id, string Title, string Theme, bool Premium, string? LocalPath, bool IsOnline, string PosterUri)
 {
     public string Subtitle => $"{Theme}{(Premium ? " — Premium" : string.Empty)}{(LocalPath is not null ? " — Ready" : string.Empty)}";
 }

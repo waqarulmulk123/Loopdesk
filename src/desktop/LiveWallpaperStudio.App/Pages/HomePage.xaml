@@ -2,33 +2,46 @@
     x:Class="LiveWallpaperStudio.App.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Padding="24">
+    <Grid Padding="28">
         <Grid.Transitions>
             <TransitionCollection>
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
         <ScrollViewer>
-            <StackPanel Spacing="16">
-                <Border x:Name="AnimatedBanner" Height="96" CornerRadius="12" Background="{ThemeResource AccentFillColorDefaultBrush}">
-                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Image Source="ms-appx:///Assets/Loopdesk.png" Width="64" Height="64" />
-                        <TextBlock Text="Live Wallpaper Studio" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <StackPanel Spacing="20">
+                <Grid Height="270">
+                    <Border CornerRadius="20" Background="{StaticResource PremiumSurfaceBrush}" />
+                    <Image Source="ms-appx:///assets/wallpapers/posters/media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp" Stretch="UniformToFill" Opacity="0.72" />
+                    <Grid Padding="28" VerticalAlignment="Bottom">
+                        <StackPanel Spacing="6" MaxWidth="540">
+                            <TextBlock Text="Bring your desktop to life" Style="{StaticResource TitleTextBlockStyle}" />
+                            <TextBlock Text="Browse an artwork-first collection, keep the videos you love on your PC, and apply them only when you choose." TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" Opacity="0.72" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Use your own video" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Preview an H.264 MP4 here before applying it to the desktop." Opacity="0.72" />
+                        <TextBox Text="{x:Bind ViewModel.VideoPath, Mode=TwoWay}" PlaceholderText="Path to an H.264 MP4 on this PC" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Preview" Click="PreviewButton_Click" />
+                            <Button Content="Apply wallpaper" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.ApplyCommand}" />
+                            <Button Content="Stop wallpaper" Command="{x:Bind ViewModel.StopCommand}" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.78" />
                     </StackPanel>
                 </Border>
-                <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" TextWrapping="Wrap" />
-                <TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" />
-                <TextBlock Text="Local video" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <TextBox Text="{x:Bind ViewModel.VideoPath, Mode=TwoWay}" PlaceholderText="Path to an H.264 MP4 on this PC" />
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Button Content="Preview in app" Click="PreviewButton_Click" />
-                    <Button Content="Apply wallpaper" Command="{x:Bind ViewModel.ApplyCommand}" />
-                    <Button Content="Stop wallpaper" Command="{x:Bind ViewModel.StopCommand}" />
-                </StackPanel>
-                <TextBlock Text="Preview (inside the app, before you apply it to the desktop)" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <MediaPlayerElement x:Name="PreviewPlayer" Height="240" AreTransportControlsEnabled="True" AutoPlay="False" />
-                <TextBlock Text="Preview plays the selected video inside this window only. Apply wallpaper hands it to the native renderer, which plays it behind desktop icons." TextWrapping="Wrap" />
-                <TextBlock Text="The renderer plays the selected video behind desktop icons. If attachment is not supported on this Windows build, it stops and leaves the desktop untouched." TextWrapping="Wrap" />
+
+                <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="14">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Preview" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <MediaPlayerElement x:Name="PreviewPlayer" Height="240" AreTransportControlsEnabled="True" AutoPlay="False" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>
