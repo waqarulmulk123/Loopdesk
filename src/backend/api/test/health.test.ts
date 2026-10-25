@@ -55,6 +55,16 @@ test('wallpaper detail uses D1-compatible placeholders for variant lookup', asyn
   assert.deepEqual(variants.values, ['aurora']);
 });
 
+test('catalog includes actual category and ready variant metadata', async () => {
+  const { db, prepared } = d1ForWallpaperDetail();
+  const response = await app.fetch(new Request('https://api.test/v1/wallpapers?limit=1'), { DB: db });
+  assert.equal(response.status, 200);
+  const catalog = prepared.find(({ sql }) => sql.includes('category_names'));
+  assert.ok(catalog);
+  assert.ok(catalog.sql.includes("processing_state = 'ready'"));
+  assert.ok(catalog.sql.includes("mime_type = 'video/mp4'"));
+});
+
 test('asset delivery reports missing R2 binding instead of returning an object key', async () => {
   const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content'), { DB: {} as D1Database });
   assert.equal(response.status, 501);

@@ -65,7 +65,10 @@ public sealed record OnlineCatalogItem(
     string? Description,
     string Kind,
     bool Premium,
-    [property: JsonPropertyName("created_at")] string CreatedAt);
+    [property: JsonPropertyName("created_at")] string CreatedAt,
+    List<string>? Categories = null,
+    int? Width = null,
+    int? Height = null);
 
 public sealed record OnlineVariant(
     string Id,
