@@ -10,9 +10,11 @@ public sealed partial class DownloadsViewModel : ObservableObject
 
     public ObservableCollection<string> Downloads { get; } = new();
 
+    // Discover verifies downloads before committing them to the shared media
+    // cache, so this page must enumerate that same final destination.
     public string DownloadsFolder => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "LiveWallpaperStudio", "downloads");
+        "LiveWallpaperStudio", "media");
 
     [RelayCommand]
     private void Refresh()
