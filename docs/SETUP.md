@@ -7,7 +7,7 @@
 3. .NET 10 SDK (see `global.json` — SDK 10.0.100, rollForward latestFeature).
 4. CMake 3.28+ and Git.
 5. Node 20+ and npm, only for the backend (`src/backend/api`).
-6. FFmpeg, only for the processing job (`src/backend/processing`).
+6. FFmpeg, optional but recommended to prepare media before publishing with `scripts\prepare-wallpaper.ps1`.
 
 ## Step-by-step setup
 
@@ -46,7 +46,7 @@ npm ci
 npm run typecheck
 npm test
 # Local mode has no D1 binding and returns an empty catalog.
-# Deploys use the named D1/R2/Queue bindings in wrangler.jsonc.
+# Deploys use the named D1 and published-R2 bindings in wrangler.jsonc.
 # Never commit secrets. See docs/DEPLOYMENT.md.
 ```
 

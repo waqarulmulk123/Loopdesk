@@ -10,7 +10,7 @@ WinUI 3 app  <-->  Renderer supervisor  <-->  Native C++ renderer (one per user 
      v                    v                              v
 SQLite library     Named pipes (ACL, versioned)     Per-monitor HWNDs, D3D11, Media Foundation
 Downloads (HttpClient, SHA-256)  -->  Verified local cache  -->  Renderer
-Optional: HTTPS  -->  Cloudflare Workers/Hono  -->  D1 catalog, R2, Queues
+Optional: HTTPS  -->  Cloudflare Workers/Hono  -->  D1 catalog, published R2
 ```
 
 - UI owns browsing, local state, downloads, settings and optional sign-in. It never blocks on decode, network or disk.
@@ -41,8 +41,8 @@ See `src/shared/contracts/protocol.schema.json`. Envelope: protocolVersion, requ
 
 ## Cloud
 
-- Public: immutable versioned assets on a custom CDN domain after publication.
-- Premium: private R2 + short-lived authorized delivery via the S3 API endpoint or an authenticated Worker/custom-domain mechanism with authorization-aware cache keys. Never cache premium content under a public shared key.
-- Ingest: admin upload intent → private staging → Queue → FFmpeg worker → validation → publish. Never transcode 4K inside a Worker request.
+- Public: the Workers API serves published R2 assets from its `workers.dev` origin until a custom domain is available.
+- Premium: deliberately disabled until an entitlement design exists. Never return a premium URL without a verified entitlement.
+- Free publish path: local FFmpeg preparation → authenticated direct MP4 upload → metadata completion → explicit publish. Cloudflare never transcodes media in this deployment.
 - D1 holds current catalog metadata. Accounts, purchases, and premium entitlements are deliberately not implemented until an identity and transactional-entitlement design is approved.
 - API: `/v1/health`, `/v1/config`, `/v1/wallpapers`, `/v1/wallpapers/:id`, `/v1/categories`, `/v1/search`, `/v1/assets/:variantId/authorize-download`, authenticated `/v1/me/favorites`, admin upload/publish/audit routes.
