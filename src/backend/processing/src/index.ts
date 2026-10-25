@@ -39,8 +39,10 @@ export default {
       try {
         const source = await env.R2_INGEST.get(job.sourceKey);
         if (!source?.body) throw new Error('Staged source object is missing.');
+        // shortcut: buffers each upload in Worker memory; use a streaming container transfer before accepting large source files.
+        const sourceBytes = await source.arrayBuffer();
         await env.DB.prepare("UPDATE ingest_jobs SET state = 'processing', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(job.jobId).run();
-        const response = await getContainer(env.TRANSCODER, job.jobId).fetch(new Request('http://container/transcode', { method: 'POST', headers: { 'content-type': 'video/mp4' }, body: source.body }));
+        const response = await getContainer(env.TRANSCODER, job.jobId).fetch(new Request('http://container/transcode', { method: 'POST', headers: { 'content-type': 'video/mp4' }, body: sourceBytes }));
         if (!response.ok || !response.body) throw new Error(`Transcoder rejected source (${response.status}).`);
         const output = await response.arrayBuffer();
         const width = Number(response.headers.get('x-width'));
