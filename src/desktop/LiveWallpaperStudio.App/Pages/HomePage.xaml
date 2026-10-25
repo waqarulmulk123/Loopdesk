@@ -16,7 +16,7 @@
                     <Grid Padding="28" VerticalAlignment="Bottom">
                         <StackPanel Spacing="6" MaxWidth="540">
                             <TextBlock Text="Bring your desktop to life" Style="{StaticResource TitleTextBlockStyle}" />
-                            <TextBlock Text="Browse an artwork-first collection, keep the videos you love on your PC, and apply them only when you choose." TextWrapping="Wrap" />
+                            <TextBlock Text="Browse the cloud collection, download a verified scene, then preview and apply it when you choose." TextWrapping="Wrap" />
                             <TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" Opacity="0.72" />
                         </StackPanel>
                     </Grid>
@@ -24,24 +24,11 @@
 
                 <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Use your own video" Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <TextBlock Text="Preview an H.264 MP4 here before applying it to the desktop." Opacity="0.72" />
-                        <TextBox Text="{x:Bind ViewModel.VideoPath, Mode=TwoWay}" PlaceholderText="Path to an H.264 MP4 on this PC" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Preview" Click="PreviewButton_Click" />
-                            <Button Content="Apply wallpaper" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.ApplyCommand}" />
-                            <Button Content="Stop wallpaper" Command="{x:Bind ViewModel.StopCommand}" />
-                        </StackPanel>
-                        <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.78" />
+                        <TextBlock Text="Cloud-first library" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Loopdesk never scans, imports, or exposes files from your drives. Discover shows cloud catalog content only; My wallpapers shows only your protected Loopdesk downloads." Opacity="0.72" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
-                <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="14">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Preview" Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <MediaPlayerElement x:Name="PreviewPlayer" Height="240" AreTransportControlsEnabled="True" AutoPlay="False" />
-                    </StackPanel>
-                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

@@ -80,9 +80,16 @@ int RunVideo(const std::wstring& videoPath) {
         return 1;
     }
 
-    int width = GetSystemMetrics(SM_CXSCREEN);
-    int height = GetSystemMetrics(SM_CYSCREEN);
     HMONITOR primary = MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+    MONITORINFO monitorInfo{};
+    monitorInfo.cbSize = sizeof(monitorInfo);
+    if (!primary || !GetMonitorInfoW(primary, &monitorInfo)) {
+        std::cout << "Failed to resolve the primary monitor bounds.\n";
+        if (comInitialized) CoUninitialize();
+        return 1;
+    }
+    const int width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+    const int height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
 
     lws::DesktopWindow window;
     if (!window.Create(primary, width, height)) {
@@ -162,6 +169,10 @@ int RunVideo(const std::wstring& videoPath) {
 }
 
 int main(int argc, char** argv) {
+    // WorkerW and D3D are sized in physical pixels. Without DPI awareness,
+    // Windows virtualizes GetMonitorInfo/GetSystemMetrics on scaled displays,
+    // producing a wallpaper that covers only part of the desktop.
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::cout << "LiveWallpaperStudio renderer (M1 in progress)\n";
     std::cout << "Displays found: " << lws::ListDisplays() << "\n";
 

@@ -10,7 +10,7 @@ namespace LiveWallpaperStudio.App.Services;
 /// </summary>
 public sealed class LocalSettingsService
 {
-    public const string DefaultApiBaseUrl = "https://live-wallpaper-studio-api.mwaqardula.workers.dev";
+    public const string ProductionApiBaseUrl = "https://live-wallpaper-studio-api.mwaqardula.workers.dev";
     public bool Muted { get; set; } = true;
     public bool PauseOnFullscreen { get; set; } = true;
     public bool PauseOnLock { get; set; } = true;
@@ -18,13 +18,12 @@ public sealed class LocalSettingsService
     public bool PauseOnBatterySaver { get; set; } = true;
     public bool SendUsageAnalytics { get; set; } = false;
     public bool SendCrashReports { get; set; } = false;
-    public string? ApiBaseUrl { get; set; } = DefaultApiBaseUrl;
     public bool HasCompletedOnboarding { get; set; } = false;
     public bool LowPowerMode { get; set; } = false;
 
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "LiveWallpaperStudio", "settings.json");
+        "Loopdesk", "settings.json");
 
     public void Save()
     {

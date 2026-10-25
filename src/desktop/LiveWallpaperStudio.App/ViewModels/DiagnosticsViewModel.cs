@@ -11,7 +11,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject
     [ObservableProperty] private string _appVersion = "1.0.0-dev";
     [ObservableProperty] private string _osVersion = Environment.OSVersion.ToString();
     [ObservableProperty] private string _rendererStatus = "Unknown";
-    [ObservableProperty] private string _mediaFolder = string.Empty;
+    [ObservableProperty] private string _storageStatus = string.Empty;
     [ObservableProperty] private string _catalogStatus = string.Empty;
 
     [RelayCommand]
@@ -20,12 +20,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject
         RendererStatus = Process.GetProcessesByName("lws-renderer").Length > 0
             ? "Renderer process is running."
             : "Renderer process is not running.";
-        MediaFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "LiveWallpaperStudio", "media");
-        string catalog = Path.Combine(AppContext.BaseDirectory, "assets", "catalog.json");
-        CatalogStatus = File.Exists(catalog)
-            ? $"Bundled catalog found at {catalog}."
-            : "Bundled catalog.json not found next to the app.";
+        StorageStatus = "Cloud downloads are protected per Windows user; playback copies are short-lived.";
+        CatalogStatus = "Cloud catalog only. No drive folders or local catalog files are scanned.";
     }
 }

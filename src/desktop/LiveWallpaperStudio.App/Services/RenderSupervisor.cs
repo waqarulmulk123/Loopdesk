@@ -96,6 +96,7 @@ public sealed class RenderSupervisor
         }
         _process?.Dispose();
         _process = null;
+        DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
         _unexpectedExits = 0;
         _stopping = false;
     }

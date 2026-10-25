@@ -19,24 +19,13 @@ public sealed partial class FavouritesViewModel : ObservableObject
     {
         Favourites.Clear();
         var favouriteIds = FavouritesService.Load();
-        var catalog = CatalogService.Load();
-        foreach (var item in catalog)
-        {
-            if (favouriteIds.Contains(item.Id))
-            {
-                Favourites.Add($"{item.Title} [{item.Theme}]{(item.Premium ? " — Premium" : string.Empty)}");
-            }
-        }
-        // Local file favourites (paths) are shown as-is.
         foreach (string id in favouriteIds)
         {
-            if (File.Exists(id) && !Favourites.Any(f => f.StartsWith(id)))
-            {
+            if (!string.IsNullOrWhiteSpace(id) && id.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_'))
                 Favourites.Add(id);
-            }
         }
         Status = Favourites.Count > 0
             ? $"Favourites: {Favourites.Count} item(s)."
-            : "No favourites yet. Add one from Discover by saving its ID in favourites.json, or use the Favourites service from a catalog item.";
+            : "No favourites yet. Save one from Discover.";
     }
 }

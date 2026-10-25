@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LiveWallpaperStudio.Core\LiveWallpaperStudio.Core.csproj" />
@@ -32,9 +33,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <!-- Keep the offline catalog and its media beside every build/publish output. -->
-    <Content Include="..\..\..\assets\**\*">
-      <Link>assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <!-- Posters are design assets only. Wallpaper video comes from the cloud
+         catalog and is never packaged or discovered from a drive. -->
+    <Content Include="..\..\..\assets\wallpapers\posters\**\*">
+      <Link>assets\wallpapers\posters\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

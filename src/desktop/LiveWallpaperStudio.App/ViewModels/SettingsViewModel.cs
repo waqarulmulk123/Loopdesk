@@ -16,7 +16,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         PauseOnBatterySaver = s.PauseOnBatterySaver;
         SendUsageAnalytics = s.SendUsageAnalytics;
         SendCrashReports = s.SendCrashReports;
-        ApiBaseUrl = s.ApiBaseUrl ?? LocalSettingsService.DefaultApiBaseUrl;
     }
 
     [ObservableProperty] private bool _muted = true;
@@ -26,7 +25,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _pauseOnBatterySaver = true;
     [ObservableProperty] private bool _sendUsageAnalytics;
     [ObservableProperty] private bool _sendCrashReports;
-    [ObservableProperty] private string _apiBaseUrl = string.Empty;
     [ObservableProperty] private string _status = string.Empty;
 
     [RelayCommand]
@@ -41,7 +39,6 @@ public sealed partial class SettingsViewModel : ObservableObject
             PauseOnBatterySaver = PauseOnBatterySaver,
             SendUsageAnalytics = SendUsageAnalytics,
             SendCrashReports = SendCrashReports,
-            ApiBaseUrl = string.IsNullOrWhiteSpace(ApiBaseUrl) ? null : ApiBaseUrl.Trim(),
         }.Save();
         Status = "Settings saved locally.";
     }
