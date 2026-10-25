@@ -22,6 +22,10 @@
     <ProjectReference Include="..\LiveWallpaperStudio.Core\LiveWallpaperStudio.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Loopdesk.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <!-- Keep the offline catalog and its media beside every build/publish output. -->
     <Content Include="..\..\..\assets\**\*">
       <Link>assets\%(RecursiveDir)%(Filename)%(Extension)</Link>

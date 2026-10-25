@@ -11,7 +11,10 @@
         <ScrollViewer>
             <StackPanel Spacing="16">
                 <Border x:Name="AnimatedBanner" Height="96" CornerRadius="12" Background="{ThemeResource AccentFillColorDefaultBrush}">
-                    <TextBlock Text="Live Wallpaper Studio" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/Loopdesk.png" Width="64" Height="64" />
+                        <TextBlock Text="Live Wallpaper Studio" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+                    </StackPanel>
                 </Border>
                 <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" TextWrapping="Wrap" />
                 <TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" />
