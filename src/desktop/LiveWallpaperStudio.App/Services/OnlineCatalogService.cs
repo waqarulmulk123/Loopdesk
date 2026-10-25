@@ -17,7 +17,47 @@ public sealed class OnlineCatalogService
         return response?.Items ?? [];
     }
 
+    public async Task<OnlineDownload> GetDownloadAsync(string baseUrl, string wallpaperId, CancellationToken cancellationToken = default)
+    {
+        Uri baseUri = ValidateBaseUrl(baseUrl);
+        var detail = await _http.GetFromJsonAsync<WallpaperDetail>(new Uri(baseUri, $"v1/wallpapers/{Uri.EscapeDataString(wallpaperId)}"), cancellationToken)
+            ?? throw new InvalidOperationException("Wallpaper details were not returned.");
+        if (detail.Item.Premium)
+            throw new InvalidOperationException("Premium wallpapers require an entitlement provider before download.");
+
+        OnlineVariant? variant = detail.Variants
+            .Where(candidate => string.Equals(candidate.Mime_Type, "video/mp4", StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(candidate.Codec, "h264", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(candidate => candidate.Width * (long)candidate.Height)
+            .FirstOrDefault();
+        if (variant is null)
+            throw new InvalidOperationException("No downloadable H.264 MP4 variant is available.");
+
+        var authorization = await _http.PostAsync(
+            new Uri(baseUri, $"v1/assets/{Uri.EscapeDataString(variant.Id)}/authorize-download"),
+            content: null,
+            cancellationToken);
+        authorization.EnsureSuccessStatusCode();
+        var ticket = await authorization.Content.ReadFromJsonAsync<DownloadAuthorization>(cancellationToken)
+            ?? throw new InvalidOperationException("Download authorization was not returned.");
+        if (!Uri.TryCreate(ticket.DownloadUrl, UriKind.Absolute, out Uri? downloadUri) || downloadUri.Scheme != Uri.UriSchemeHttps)
+            throw new InvalidOperationException("Download URL must use HTTPS.");
+
+        return new OnlineDownload(detail.Item, variant, downloadUri);
+    }
+
+    private static Uri ValidateBaseUrl(string baseUrl)
+    {
+        if (!Uri.TryCreate(baseUrl.TrimEnd('/') + "/", UriKind.Absolute, out var baseUri) || baseUri.Scheme != Uri.UriSchemeHttps)
+            throw new InvalidOperationException("Online catalog URL must use HTTPS.");
+        return baseUri;
+    }
+
     private sealed record CatalogResponse(List<OnlineCatalogItem>? Items);
+    private sealed record WallpaperDetail(OnlineCatalogItem Item, List<OnlineVariant> Variants);
+    private sealed record DownloadAuthorization(string DownloadUrl);
 }
 
 public sealed record OnlineCatalogItem(string Id, string Title, string? Description, string Kind, bool Premium, string Created_At);
+public sealed record OnlineVariant(string Id, string Variant_Key, string Mime_Type, string Codec, int Width, int Height, int Fps, long Size_Bytes, string Sha256);
+public sealed record OnlineDownload(OnlineCatalogItem Item, OnlineVariant Variant, Uri DownloadUri);

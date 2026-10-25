@@ -15,8 +15,20 @@
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />
                 <Button Content="Refresh catalog" Command="{x:Bind ViewModel.RefreshCommand}" />
+                <Button Content="Download selected" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />
+                <Button Content="Apply selected" Command="{x:Bind ViewModel.ApplySelectedCommand}" />
             </StackPanel>
-            <ListView ItemsSource="{x:Bind ViewModel.CatalogItems, Mode=OneWay}" />
+            <ListView ItemsSource="{x:Bind ViewModel.CatalogItems, Mode=OneWay}"
+                      SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Padding="8,4">
+                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Subtitle}" Opacity="0.7" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackPanel>
     </Grid>
 </Page>
