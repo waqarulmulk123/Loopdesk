@@ -31,6 +31,21 @@ function parseLimit(value: string | undefined): number | null {
   return limit <= 100 ? limit : 100;
 }
 
+function parseRange(value: string, size: number): { offset: number; length: number } | null {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(value);
+  if (!match) return null;
+  const [, startText, endText] = match;
+  if (!startText && !endText) return null;
+  if (!startText) {
+    const length = Number(endText);
+    return Number.isSafeInteger(length) && length > 0 ? { offset: Math.max(0, size - length), length: Math.min(size, length) } : null;
+  }
+  const offset = Number(startText);
+  const end = endText ? Number(endText) : size - 1;
+  if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(end) || offset < 0 || end < offset || offset >= size) return null;
+  return { offset, length: Math.min(end, size - 1) - offset + 1 };
+}
+
 app.get('/v1/health', (c) =>
   c.json({ status: 'ok', apiVersion: 'v1', build: '0.2.0' }),
 );
@@ -118,11 +133,20 @@ app.get('/v1/assets/:variantId/content', async (c) => {
   ).bind(c.req.param('variantId')).first<{ object_key: string; mime_type: string; premium: number; visibility: string; processing_state: string }>();
   if (!row || row.visibility !== 'published' || row.processing_state !== 'ready') return c.json({ error: { code: 'not_found', message: 'Variant not found.' } }, 404);
   if (row.premium) return c.json({ error: { code: 'forbidden', message: 'Premium entitlement verification is not configured.' } }, 403);
-  const object = await c.env.R2_PUBLISHED.get(row.object_key);
+  const requestedRange = c.req.header('range');
+  const head = requestedRange ? await c.env.R2_PUBLISHED.head(row.object_key) : null;
+  if (requestedRange && !head) return c.json({ error: { code: 'not_found', message: 'Published object not found.' } }, 404);
+  const range = requestedRange && head ? parseRange(requestedRange, head.size) : undefined;
+  if (requestedRange && !range) return new Response(null, { status: 416, headers: { 'content-range': `bytes */${head!.size}`, 'accept-ranges': 'bytes' } });
+  const object = await c.env.R2_PUBLISHED.get(row.object_key, range ? { range } : undefined);
   if (!object) return c.json({ error: { code: 'not_found', message: 'Published object not found.' } }, 404);
-  const headers = new Headers({ 'content-type': row.mime_type, 'cache-control': 'public, max-age=31536000, immutable', etag: object.httpEtag });
+  const headers = new Headers({ 'content-type': row.mime_type, 'cache-control': 'public, max-age=31536000, immutable', etag: object.httpEtag, 'accept-ranges': 'bytes' });
   object.writeHttpMetadata(headers);
-  return new Response(object.body, { headers });
+  if (range) {
+    headers.set('content-range', `bytes ${range.offset}-${range.offset + range.length - 1}/${head!.size}`);
+    headers.set('content-length', String(range.length));
+  }
+  return new Response(object.body, { status: range ? 206 : 200, headers });
 });
 
 app.get('/v1/me/favorites', (c) =>

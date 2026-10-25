@@ -27,6 +27,7 @@ See `src/backend/api/src/index.ts` for the deployed D1-backed implementation.
 - Cursor pagination, deterministic sort with tie-breaker, limit max 100.
 - Anonymous catalog GETs may be cached at the edge for a short bounded period; no private account data in shared cache.
 - Public media is served only by the API after a catalog record has been published. Premium remains unavailable until a real entitlement provider exists.
+- `GET /v1/assets/:variantId/content` supports a single HTTP `Range` request and returns `206`, `Content-Range`, and `Accept-Ranges: bytes` so the desktop cache can resume verified downloads.
 - Client honours 429 and Retry-After.
 - Admin access requires a credible identity provider with MFA and RBAC. Do not invent an insecure password database.
 
