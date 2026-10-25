@@ -32,7 +32,9 @@ public static class FavouritesService
     public static void Save(List<string> favourites)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(favourites, new JsonSerializerOptions { WriteIndented = true }));
+        string temporaryPath = FilePath + ".tmp";
+        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(favourites, new JsonSerializerOptions { WriteIndented = true }));
+        File.Move(temporaryPath, FilePath, overwrite: true);
     }
 
     public static bool Toggle(string id)

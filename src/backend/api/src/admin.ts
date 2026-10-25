@@ -62,7 +62,7 @@ export function adminRoutes(): Hono<{ Bindings: AdminBindings }> {
     const targetKey = `published/${wallpaperId}/source.mp4`;
     await db.batch([
       db.prepare('INSERT INTO wallpapers (id, title, description, kind, visibility, premium) VALUES (?, ?, ?, ?, ?, ?)').bind(wallpaperId, title, typeof body?.description === 'string' ? body.description.slice(0, 4000) : '', 'video', 'draft', 0),
-      db.prepare('INSERT INTO media_variants (id, wallpaper_id, variant_key, object_key, mime_type, codec, width, height, fps, size_bytes, sha256, processing_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(variantId, wallpaperId, 'source', targetKey, 'video/mp4', 'h264', width, height, fps, sizeBytes, sha256, 'awaiting_upload'),
+      db.prepare('INSERT INTO media_variants (id, wallpaper_id, variant_key, object_key, mime_type, codec, width, height, fps, size_bytes, sha256, processing_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(variantId, wallpaperId, `source-${variantId}`, targetKey, 'video/mp4', 'h264', width, height, fps, sizeBytes, sha256, 'awaiting_upload'),
       db.prepare('INSERT INTO ingest_jobs (id, wallpaper_id, state) VALUES (?, ?, ?)').bind(jobId, wallpaperId, 'awaiting_upload'),
     ]);
     return c.json({ jobId, wallpaperId, variantId, uploadUrl: `${new URL(c.req.url).origin}/v1/admin/uploads/${jobId}/content`, processing: 'direct_publish' }, 201);

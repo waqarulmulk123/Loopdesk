@@ -32,6 +32,7 @@ function parseLimit(value: string | undefined): number | null {
 }
 
 function parseRange(value: string, size: number): { offset: number; length: number } | null {
+  if (!Number.isSafeInteger(size) || size <= 0) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(value);
   if (!match) return null;
   const [, startText, endText] = match;

@@ -26,6 +26,7 @@ public static class IpcValidation
         && messageBytes > 0
         && messageBytes <= MaxMessageBytes
         && Guid.TryParse(envelope.RequestId, out _)
+        && envelope.Kind == "request"
         && IsValidMethod(envelope.Method);
 
     public static bool IsAllowedLocalPath(string path)

@@ -17,6 +17,7 @@ public static class IpcClient
         await using var client = new NamedPipeClientStream(
             ".", "LiveWallpaperStudioRenderer", PipeDirection.InOut, PipeOptions.Asynchronous);
         await client.ConnectAsync(TimeSpan.FromSeconds(5), ct);
+        client.ReadMode = PipeTransmissionMode.Message;
         string request = JsonSerializer.Serialize(new
         {
             protocolVersion = 1,
