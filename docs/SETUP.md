@@ -56,4 +56,4 @@ npm test
 - **WinUI build fails on TargetFramework:** check the Windows SDK version matches `net10.0-windows10.0.26100.0` and the App SDK package (2.5.1) restored.
 - **Catalog empty in Discover:** `assets/catalog.json` must be next to the app exe, or the app honestly reports "not configured".
 - **Video plays but icons are covered:** stop immediately, record OS build / GPU / display config, and file it as a shell-attachment failure — do not ship a workaround that covers icons.
-- **MSIX packaging:** replace the Publisher identity in `packaging/msix/Package.appxmanifest` before packaging; unsigned QA builds are not production builds.
+- **MSIX packaging:** the Store identity is already configured in `src/desktop/LiveWallpaperStudio.App/Package.appxmanifest`. Build the Store MSIX from that project; Microsoft re-signs MSIX packages after Store certification.

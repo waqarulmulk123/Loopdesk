@@ -24,9 +24,6 @@ jobs:
       - name: Build .NET Core library
         run: dotnet build src/desktop/LiveWallpaperStudio.Core/LiveWallpaperStudio.Core.csproj -c Release
 
-      - name: Build WinUI app (unpackaged, x64)
-        run: dotnet build src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -p:Platform=x64
-
       - name: Run .NET tests
         run: dotnet run --project tests/Core.Tests/Core.Tests.csproj -c Release
 
@@ -38,6 +35,15 @@ jobs:
 
       - name: Run native renderer (M0 startup proof)
         run: .\build\renderer\Release\lws-renderer.exe
+
+      - name: Build WinUI app (unpackaged, x64)
+        run: dotnet build src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -p:Platform=x64
+
+      - name: Create Microsoft Store MSIX
+        shell: pwsh
+        run: |
+          $storePackage = Join-Path $env:GITHUB_WORKSPACE "artifacts\store\"
+          msbuild src\desktop\LiveWallpaperStudio.App\LiveWallpaperStudio.App.csproj /restore /p:Configuration=Release /p:Platform=x64 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageDir=$storePackage /p:AppxPackageSigningEnabled=false
 
       - name: Create unsigned Windows QA package
         shell: pwsh
@@ -52,6 +58,13 @@ jobs:
         with:
           name: LiveWallpaperStudio-win-x64-unsigned
           path: artifacts/LiveWallpaperStudio-win-x64-unsigned.zip
+          if-no-files-found: error
+
+      - name: Upload Microsoft Store MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: Loopdesk-store-msix
+          path: artifacts/store/**/*.msix
           if-no-files-found: error
 
       - name: Upload renderer artifact
