@@ -146,7 +146,7 @@ public sealed partial class MainViewModel : ObservableObject
             : "Catalog: not configured or catalog.json not found next to the app.";
         if (items.Count > 0)
         {
-            Status = "Catalog loaded. Online catalog is not configured unless an API URL is set in Settings.";
+            Status = "Bundled catalog ready. Discover loads the live catalog when online access is enabled.";
         }
     }
 
