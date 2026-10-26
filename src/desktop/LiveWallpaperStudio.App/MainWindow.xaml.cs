@@ -1,5 +1,6 @@
 using LiveWallpaperStudio.App.Pages;
 using LiveWallpaperStudio.App.Services;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -8,9 +9,25 @@ namespace LiveWallpaperStudio.App;
 
 public sealed partial class MainWindow : Window
 {
+    private readonly DispatcherQueueTimer _rendererStatusTimer;
+
     public MainWindow()
     {
         InitializeComponent();
+        _rendererStatusTimer = DispatcherQueue.CreateTimer();
+        _rendererStatusTimer.Interval = TimeSpan.FromSeconds(2);
+        _rendererStatusTimer.Tick += (_, _) => UpdateRendererStatus();
+        Activated += (_, _) => UpdateRendererStatus();
+        Closed += (_, _) => _rendererStatusTimer.Stop();
+        _rendererStatusTimer.Start();
+    }
+
+    private void UpdateRendererStatus()
+    {
+        bool isRunning = RenderSupervisor.Instance.IsRunning;
+        RendererStatusText.Text = isRunning ? "Renderer service • Ready" : "Renderer service • Not running";
+        RendererStatusDot.Fill = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            Windows.UI.Color.FromArgb(255, isRunning ? (byte)59 : (byte)229, isRunning ? (byte)234 : (byte)163, isRunning ? (byte)160 : (byte)61));
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)
