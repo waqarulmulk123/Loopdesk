@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { adminRoutes } from './admin.js';
-import { createDb, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
+import { createDb, decodeCursor, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
 
 // Cloudflare Workers API, spec section 11.
 // Real D1 catalog queries are used when the DB binding is configured.
@@ -81,9 +81,12 @@ app.get('/v1/config', (c) =>
 app.get('/v1/wallpapers', async (c) => {
   const limit = parseLimit(c.req.query('limit'));
   if (limit === null) return c.json({ error: { code: 'invalid_request', message: 'limit must be a positive integer.' } }, 400);
+  const cursor = decodeCursor(c.req.query('cursor'));
+  if (cursor === null) return c.json({ error: { code: 'invalid_request', message: 'cursor is invalid.' } }, 400);
   const db = createDb(c.env);
-  const items = (await listWallpapers(db, limit, c.req.query('category'))) ?? [];
-  return c.json({ items, nextCursor: null, limit, catalogVersion: null });
+  const page = await listWallpapers(db, limit, c.req.query('category'), cursor);
+  c.header('cache-control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
+  return c.json({ items: page?.items ?? [], nextCursor: page?.nextCursor ?? null, limit, catalogVersion: null });
 });
 
 app.get('/v1/wallpapers/:id', async (c) => {
@@ -113,9 +116,12 @@ app.get('/v1/search', async (c) => {
   }
   const limit = parseLimit(c.req.query('limit'));
   if (limit === null) return c.json({ error: { code: 'invalid_request', message: 'limit must be a positive integer.' } }, 400);
+  const cursor = decodeCursor(c.req.query('cursor'));
+  if (cursor === null) return c.json({ error: { code: 'invalid_request', message: 'cursor is invalid.' } }, 400);
   const db = createDb(c.env);
-  const items = (await searchWallpapers(db, q, limit)) ?? [];
-  return c.json({ items, nextCursor: null });
+  const page = await searchWallpapers(db, q, limit, cursor);
+  c.header('cache-control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
+  return c.json({ items: page?.items ?? [], nextCursor: page?.nextCursor ?? null });
 });
 
 app.post('/v1/assets/:variantId/authorize-download', async (c) => {
