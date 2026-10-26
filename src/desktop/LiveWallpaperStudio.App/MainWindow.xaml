@@ -61,8 +61,8 @@
             <StackPanel Padding="14,8,14,16" Spacing="8">
                 <Border Height="1" Background="{StaticResource ShellBorderBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Ellipse Width="8" Height="8" Fill="#FF3BEAA0" VerticalAlignment="Center" />
-                    <TextBlock Text="Renderer service • Ready" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" />
+                    <Ellipse x:Name="RendererStatusDot" Width="8" Height="8" Fill="#FFE5A33D" VerticalAlignment="Center" />
+                    <TextBlock x:Name="RendererStatusText" Text="Renderer service • Not running" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" />
                 </StackPanel>
                 <TextBlock Text="UI CONCEPT • NOT A LIVE SCREENSHOT" Foreground="#FF7789AA" FontSize="11" TextWrapping="Wrap" />
             </StackPanel>
