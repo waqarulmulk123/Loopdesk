@@ -53,4 +53,4 @@ Icons (WebP, square):
 - `src/desktop/LiveWallpaperStudio.Infrastructure/Sqlite/seed.sql` — the same seed as SQL, to apply after schema.sql.
 - `src/backend/database/migrations/002_seed_premium_themes.sql`, `003_seed_premium_glass.sql`, and `004_seed_4k_animated.sql` are legacy PostgreSQL seed drafts. They are not applied to the deployed D1 catalog and must not be used for production until they are ported, processed, rights-reviewed, and published through the ingest workflow.
 
-To use locally: copy a video file to `%LOCALAPPDATA%\LiveWallpaperStudio\media`, or point the WinUI app at the bundled file under `assets/wallpapers/video/`, and press Apply. The app plays the video behind desktop icons via the native renderer; set it in Lively Wallpaper / Wallpaper Engine as a fallback if the app's shell attachment is unsupported on your Windows build.
+These files are source and publishing assets. The consumer desktop app does not import or scan them; it displays only cloud-catalog downloads protected in its per-user vault. Publish owned, rights-reviewed H.264 MP4 assets through the authenticated backend workflow before they can appear in Discover.
