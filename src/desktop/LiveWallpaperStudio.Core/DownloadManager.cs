@@ -37,6 +37,10 @@ public sealed class DownloadManager
         IProgress<(long Done, long? Total)>? progress = null,
         CancellationToken ct = default)
     {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? source) || source.Scheme != Uri.UriSchemeHttps)
+        {
+            return new DownloadResult(false, "Download source must use HTTPS.");
+        }
         Directory.CreateDirectory(Path.GetDirectoryName(tempPath)!);
         Directory.CreateDirectory(Path.GetDirectoryName(finalPath)!);
 
@@ -51,7 +55,7 @@ public sealed class DownloadManager
         {
             try
             {
-                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                using var request = new HttpRequestMessage(HttpMethod.Get, source);
                 if (existing > 0)
                 {
                     request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(existing, null);
