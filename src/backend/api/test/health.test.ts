@@ -72,6 +72,46 @@ test('catalog includes actual category and ready variant metadata', async () => 
   assert.ok(catalog.sql.includes("mime_type = 'video/mp4'"));
 });
 
+test('catalog uses an opaque cursor and edge cache headers for a stable next page', async () => {
+  const { db, prepared } = d1ForWallpaperDetail();
+  const response = await app.fetch(new Request('https://api.test/v1/wallpapers?limit=1&cursor=not-a-valid-cursor!'), { DB: db });
+  assert.equal(response.status, 400);
+
+  const catalog = await app.fetch(new Request('https://api.test/v1/wallpapers?limit=1'), { DB: db });
+  assert.equal(catalog.status, 200);
+  assert.match(catalog.headers.get('cache-control') ?? '', /s-maxage=300/);
+  const query = prepared.find(({ sql }) => sql.includes('category_names'));
+  assert.ok(query);
+  assert.deepEqual(query.values, [2]);
+});
+
+test('catalog returns a continuation cursor only when another row exists', async () => {
+  const queries: { values: unknown[] }[] = [];
+  const db = {
+    prepare() {
+      const query = { values: [] as unknown[] };
+      queries.push(query);
+      return {
+        bind(...values: unknown[]) { query.values = values; return this; },
+        async all() {
+          return { results: [
+            { id: 'newer', title: 'Newer', description: '', kind: 'video', visibility: 'published', premium: 0, created_at: '2026-10-26T12:00:00Z', category_names: '' },
+            { id: 'older', title: 'Older', description: '', kind: 'video', visibility: 'published', premium: 0, created_at: '2026-10-25T12:00:00Z', category_names: '' },
+          ] };
+        },
+      };
+    },
+  } as unknown as D1Database;
+  const first = await app.fetch(new Request('https://api.test/v1/wallpapers?limit=1'), { DB: db });
+  const firstPage = await first.json<{ items: { id: string }[]; nextCursor: string | null }>();
+  assert.equal(firstPage.items.length, 1);
+  assert.equal(firstPage.items[0].id, 'newer');
+  assert.ok(firstPage.nextCursor);
+
+  await app.fetch(new Request(`https://api.test/v1/wallpapers?limit=1&cursor=${encodeURIComponent(firstPage.nextCursor)}`), { DB: db });
+  assert.deepEqual(queries[1].values, ['2026-10-26T12:00:00Z', '2026-10-26T12:00:00Z', 'newer', 2]);
+});
+
 test('asset delivery reports missing R2 binding instead of returning an object key', async () => {
   const response = await app.fetch(new Request('https://api.test/v1/assets/variant-1/content'), { DB: {} as D1Database });
   assert.equal(response.status, 501);
