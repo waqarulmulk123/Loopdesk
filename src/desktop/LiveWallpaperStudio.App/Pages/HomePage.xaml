@@ -16,7 +16,7 @@
                         <TextBlock Text="Good evening." FontSize="40" FontWeight="SemiBold" />
                         <TextBlock Text="Make your desktop a space you love." Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="16" />
                     </StackPanel>
-                    <Button Content="+ Browse wallpapers" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BrowseButton_Click" />
+                    <Button Content="+ Import wallpaper" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BrowseButton_Click" />
                 </Grid>
 
                 <Grid Height="328">
@@ -30,8 +30,8 @@
                         <TextBlock Text="Escape into&#x0a;the extraordinary." FontSize="36" FontWeight="SemiBold" LineHeight="40" />
                         <TextBlock Text="Ambient motion, breathtaking scenes, and a more personal desktop." Foreground="#FFD2DBED" FontSize="16" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Content="Browse catalog" Style="{StaticResource HomePrimaryButtonStyle}" Click="BrowseButton_Click" />
-                            <Button Content="My wallpapers" Style="{StaticResource HomeSecondaryButtonStyle}" Click="LibraryButton_Click" />
+                            <Button Content="▶ Apply wallpaper" Style="{StaticResource HomePrimaryButtonStyle}" Click="BrowseButton_Click" />
+                            <Button Content="Preview" Style="{StaticResource HomeSecondaryButtonStyle}" Click="LibraryButton_Click" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -51,25 +51,25 @@
                     <Button Grid.Column="0" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="0" Click="BrowseButton_Click">
                         <StackPanel HorizontalAlignment="Stretch" Spacing="0">
                             <Image Source="ms-appx:///assets/wallpapers/posters/media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp" Height="144" Stretch="UniformToFill" />
-                            <StackPanel Padding="16,14" Spacing="6"><TextBlock Text="Aurora Dreamscape" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Nature · Cloud" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><TextBlock Text="BROWSE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="11" FontWeight="SemiBold" CharacterSpacing="80" /></StackPanel>
+                            <Grid Padding="16,14"><StackPanel Spacing="6"><TextBlock Text="Aurora Dreamscape" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Nature · 1080p" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><Border Background="#FF183B40" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0"><TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" /></Border></StackPanel><Border Width="44" Height="30" Background="#FF2E3E63" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"><TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" /></Border></Grid>
                         </StackPanel>
                     </Button>
                     <Button Grid.Column="1" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="0" Click="BrowseButton_Click">
                         <StackPanel HorizontalAlignment="Stretch" Spacing="0">
                             <Image Source="ms-appx:///assets/wallpapers/posters/media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp" Height="144" Stretch="UniformToFill" />
-                            <StackPanel Padding="16,14" Spacing="6"><TextBlock Text="Neon city" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="City · Cloud" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><TextBlock Text="BROWSE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="11" FontWeight="SemiBold" CharacterSpacing="80" /></StackPanel>
+                            <Grid Padding="16,14"><StackPanel Spacing="6"><TextBlock Text="Liquid Neon Flow" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Abstract · 1080p" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><Border Background="#FF183B40" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0"><TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" /></Border></StackPanel><Border Width="44" Height="30" Background="#FF2E3E63" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"><TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" /></Border></Grid>
                         </StackPanel>
                     </Button>
                     <Button Grid.Column="2" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="0" Click="BrowseButton_Click">
                         <StackPanel HorizontalAlignment="Stretch" Spacing="0">
                             <Image Source="ms-appx:///assets/wallpapers/posters/media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp" Height="144" Stretch="UniformToFill" />
-                            <StackPanel Padding="16,14" Spacing="6"><TextBlock Text="Cosmic Infinity" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Space · Cloud" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><TextBlock Text="BROWSE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="11" FontWeight="SemiBold" CharacterSpacing="80" /></StackPanel>
+                            <Grid Padding="16,14"><StackPanel Spacing="6"><TextBlock Text="Cosmic Infinity" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Space · 1080p" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><Border Background="#FF183B40" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0"><TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" /></Border></StackPanel><Border Width="44" Height="30" Background="#FF2E3E63" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"><TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" /></Border></Grid>
                         </StackPanel>
                     </Button>
                     <Button Grid.Column="3" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="0" Click="BrowseButton_Click">
                         <StackPanel HorizontalAlignment="Stretch" Spacing="0">
                             <Image Source="ms-appx:///assets/wallpapers/posters/media-generation-poster-glass-galaxy-0-2eeb06f5-8156-4f03-809c-a3c3cc065643.webp" Height="144" Stretch="UniformToFill" />
-                            <StackPanel Padding="16,14" Spacing="6"><TextBlock Text="Glass Galaxy" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Abstract · Cloud" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><TextBlock Text="BROWSE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="11" FontWeight="SemiBold" CharacterSpacing="80" /></StackPanel>
+                            <Grid Padding="16,14"><StackPanel Spacing="6"><TextBlock Text="Quantum Processor" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="Technology · 1080p" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" /><Border Background="#FF183B40" CornerRadius="12" Padding="9,4" HorizontalAlignment="Left" Margin="0,6,0,0"><TextBlock Text="FREE" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" /></Border></StackPanel><Border Width="44" Height="30" Background="#FF2E3E63" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"><TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" /></Border></Grid>
                         </StackPanel>
                     </Button>
                 </Grid>
