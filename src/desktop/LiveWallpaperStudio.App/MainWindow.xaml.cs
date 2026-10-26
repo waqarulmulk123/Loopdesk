@@ -11,6 +11,8 @@ public sealed partial class MainWindow : Window
 {
     private readonly DispatcherQueueTimer _rendererStatusTimer;
 
+    public string AppVersion => $"Loopdesk {GetType().Assembly.GetName().Version?.ToString(3) ?? "1.0.0"}";
+
     public MainWindow()
     {
         InitializeComponent();
