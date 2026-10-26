@@ -16,7 +16,7 @@
                 <TextBlock Text="Discover" FontSize="40" FontWeight="SemiBold" />
                 <TextBlock Text="Find beautiful video wallpapers from the online catalog." Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="16" />
             </StackPanel>
-            <Button Content="Refresh catalog" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button Content="↻ Refresh catalog" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" />
         </Grid>
 
         <StackPanel Grid.Row="1" Spacing="18">
@@ -28,7 +28,15 @@
                 <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search titles and themes" VerticalContentAlignment="Center" />
                 <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
             </Grid>
-            <TextBlock Text="Cloud catalog" Foreground="{StaticResource PremiumAccentBrush}" FontWeight="SemiBold" FontSize="13" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" />
+                <Button Content="Nature" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Nature" />
+                <Button Content="Space" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Space" />
+                <Button Content="Abstract" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Abstract" />
+                <Button Content="Technology" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Technology" />
+                <Button Content="City" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="City" />
+                <Button Content="Fantasy" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Fantasy" />
+            </StackPanel>
         </StackPanel>
 
         <GridView Grid.Row="2"

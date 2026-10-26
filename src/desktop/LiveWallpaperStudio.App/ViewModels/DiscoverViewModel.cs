@@ -19,6 +19,9 @@ public sealed partial class DiscoverViewModel : ObservableObject
     private string _searchText = string.Empty;
 
     [ObservableProperty]
+    private string _selectedCategory = "All";
+
+    [ObservableProperty]
     private DiscoverItem? _selectedItem;
 
     public ObservableCollection<DiscoverItem> CatalogItems { get; } = new();
@@ -55,6 +58,14 @@ public sealed partial class DiscoverViewModel : ObservableObject
         ApplySearch();
     }
 
+    [RelayCommand]
+    private void SelectCategory(string category)
+    {
+        SelectedCategory = category;
+    }
+
+    partial void OnSelectedCategoryChanged(string value) => ApplySearch();
+
     private void ApplySearch()
     {
         CatalogItems.Clear();
@@ -65,9 +76,11 @@ public sealed partial class DiscoverViewModel : ObservableObject
                 item.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 item.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
                 item.Kind.Contains(query, StringComparison.OrdinalIgnoreCase);
-            if (matchesQuery)
+            string category = item.Categories?.FirstOrDefault() ?? "Uncategorized";
+            bool matchesCategory = SelectedCategory == "All" ||
+                category.Equals(SelectedCategory, StringComparison.OrdinalIgnoreCase);
+            if (matchesQuery && matchesCategory)
             {
-                string category = item.Categories?.FirstOrDefault() ?? "Uncategorized";
                 string resolution = item.Width is > 0 && item.Height is > 0 ? $"{item.Width}×{item.Height}" : "Resolution unavailable";
                 CatalogItems.Add(new DiscoverItem(item.Id, item.Title, category, resolution, item.Premium,
                     DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), PosterFor(item.Id)));

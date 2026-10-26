@@ -8,23 +8,23 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
-            <!-- The gallery uses deep blue-black surfaces so the artwork, not
-                 the chrome, is the focal point. -->
-            <Color x:Key="PremiumAccentColor">#FF35D8F1</Color>
+            <!-- Shared tokens are intentionally close to the approved 1600×1000 prototype. -->
+            <Color x:Key="PremiumAccentColor">#FF50DDF1</Color>
             <Color x:Key="PremiumAccentLightColor">#FFB9F7FF</Color>
             <Color x:Key="PremiumGoldColor">#FFFFD166</Color>
-            <Color x:Key="PremiumCardColor">#FF121D36</Color>
-            <Color x:Key="PremiumSurfaceColor">#FF070F22</Color>
-            <Color x:Key="PremiumTextPrimaryColor">#FFF3F6FF</Color>
-            <Color x:Key="PremiumTextSecondaryColor">#FFA9B8D5</Color>
+            <Color x:Key="PremiumCardColor">#FF101A30</Color>
+            <Color x:Key="PremiumSurfaceColor">#FF080E20</Color>
+            <Color x:Key="PremiumTextPrimaryColor">#FFF1F6FF</Color>
+            <Color x:Key="PremiumTextSecondaryColor">#FF9DADC9</Color>
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="{StaticResource PremiumAccentColor}" />
             <SolidColorBrush x:Key="PremiumGoldBrush" Color="{StaticResource PremiumGoldColor}" />
             <SolidColorBrush x:Key="PremiumCardBrush" Color="{StaticResource PremiumCardColor}" />
             <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="{StaticResource PremiumSurfaceColor}" />
+            <SolidColorBrush x:Key="PremiumTextPrimaryBrush" Color="{StaticResource PremiumTextPrimaryColor}" />
             <SolidColorBrush x:Key="PremiumTextSecondaryBrush" Color="{StaticResource PremiumTextSecondaryColor}" />
-            <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF071024" />
-            <SolidColorBrush x:Key="ShellRailBrush" Color="#FF0D1732" />
-            <SolidColorBrush x:Key="ShellBorderBrush" Color="#FF223456" />
+            <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF080E20" />
+            <SolidColorBrush x:Key="ShellRailBrush" Color="#FF0F1630" />
+            <SolidColorBrush x:Key="ShellBorderBrush" Color="#FF20273D" />
             <SolidColorBrush x:Key="HomeHeroBrush" Color="#FF0B1C38" />
             <LinearGradientBrush x:Key="HomeHeroOverlayBrush" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Color="#FF08182E" Offset="0" />
@@ -55,6 +55,34 @@
                 <Setter Property="CornerRadius" Value="9" />
                 <Setter Property="Padding" Value="18,10" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource HomePrimaryButtonStyle}" />
+            <Style x:Key="TitleTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="40" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource PremiumTextPrimaryBrush}" />
+            </Style>
+            <Style x:Key="SubtitleTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource PremiumTextPrimaryBrush}" />
+            </Style>
+            <Style x:Key="PageEyebrowTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource PremiumAccentBrush}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="CharacterSpacing" Value="170" />
+            </Style>
+            <Style x:Key="PageTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}" />
+            <Style x:Key="PageSubtitleTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource PremiumTextSecondaryBrush}" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+            <Style x:Key="PageCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource PremiumCardBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource ShellBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="18" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>
