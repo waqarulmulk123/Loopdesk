@@ -54,21 +54,21 @@ jobs:
           Compress-Archive -Path "$publish\*" -DestinationPath "artifacts\LiveWallpaperStudio-win-x64-unsigned.zip" -Force
 
       - name: Upload unsigned Windows QA package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: LiveWallpaperStudio-win-x64-unsigned
           path: artifacts/LiveWallpaperStudio-win-x64-unsigned.zip
           if-no-files-found: error
 
       - name: Upload Microsoft Store MSIX
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Loopdesk-store-msix
           path: artifacts/store/**/*.msix
           if-no-files-found: error
 
       - name: Upload renderer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lws-renderer-windows-x64
           path: build/renderer/Release/lws-renderer.exe
