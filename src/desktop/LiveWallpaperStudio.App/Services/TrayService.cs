@@ -51,7 +51,7 @@ public sealed class TrayService : IDisposable
             uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
             uCallbackMessage = 0x0400 + 1,
             hIcon = IntPtr.Zero,
-            szTip = "Live Wallpaper Studio",
+            szTip = "Loopdesk",
         };
         _added = Shell_NotifyIcon(NIM_ADD, ref data);
         return _added;
