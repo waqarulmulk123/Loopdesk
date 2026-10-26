@@ -19,6 +19,25 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.route('/', adminRoutes());
 
+// This public, stable URL is used by the Microsoft Store listing. Keep this
+// statement aligned with the desktop client's actual data handling.
+const privacyPolicy = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Loopdesk Privacy Policy</title></head>
+<body><main><h1>Loopdesk Privacy Policy</h1><p>Effective date: October 26, 2026</p>
+<p>Loopdesk is a Windows desktop application for browsing, downloading, and applying live wallpapers.</p>
+<h2>Information we handle</h2><p>Loopdesk does not require an account and does not collect names, email addresses, payment information, advertising identifiers, or location data. The app does not scan or upload files from your drives. It requests the catalog and wallpaper files you choose from the Loopdesk service; normal network information needed to deliver those requests, such as IP address and request metadata, may be processed by the hosting provider.</p>
+<h2>Local storage</h2><p>Wallpaper files you download, their previews, and app settings are stored locally in the Loopdesk application data folder on your device. They are used to provide offline playback and can be removed through the app or by uninstalling it.</p>
+<h2>Sharing</h2><p>Loopdesk does not sell or share personal information for advertising. We use Cloudflare to host the catalog and deliver selected wallpaper files.</p>
+<h2>Changes</h2><p>If this policy changes, the effective date and this page will be updated.</p></main></body></html>`;
+
+app.get('/privacy', () => new Response(privacyPolicy, {
+  headers: {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'public, max-age=3600',
+    'x-content-type-options': 'nosniff',
+  },
+}));
+
 app.onError((error, c) => {
   console.error('Unhandled API error', error);
   return c.json({ error: { code: 'internal_error', message: 'Request could not be completed.' } }, 500);
