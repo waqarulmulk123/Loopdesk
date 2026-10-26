@@ -7,7 +7,7 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 | Milestone | Status | Evidence / gap |
 |---|---|---|
 | M0 — Environment, source, feasibility | CI verified; physical validation pending | GitHub Actions builds the .NET components and native renderer, runs the .NET harness, and starts the renderer. |
-| M1 — Minimal real desktop video wallpaper | Physical playback verified | On 2026-10-26, the Release renderer attached its real `LwsWallpaperWindow` to a non-icon-hosting `WorkerW`, decoded/presented the owned H.264 sample (IPC frames 122 → 221), and shut down with exit 0. `scripts/test-renderer-desktop-attachment.ps1` reproduces this proof. |
+| M1 — Minimal real desktop video wallpaper | Physical playback verified | On 2026-10-26, the Release renderer attached its real `LwsWallpaperWindow` to a non-icon-hosting `WorkerW`, decoded/presented the owned H.264 sample (IPC frames 104 → 203), and shut down with exit 0 on Windows 10 Pro 19045 / Intel HD Graphics 620 (driver 31.0.101.2140). `scripts/test-renderer-desktop-attachment.ps1` reproduces this proof. |
 | M2 — Reliable engine, multi-monitor | Single-monitor verified; multi-monitor pending | The renderer, IPC and display model are exercised on one 1920x1080 display. Explorer-restart, device-loss and true multi-monitor assignment require the corresponding physical display/event configurations. |
 | M3 — Windows application | Build and renderer acceptance verified | Discover is cloud-only. It downloads a selected free Cloudflare MP4, verifies SHA-256/size, protects it per Windows user with DPAPI, and exposes preview/apply only from My wallpapers. The UI never scans or displays drive paths. |
 | M4 — Free Cloudflare backend | Deployed and verified | Production Worker, D1 and R2 publish five owned free H.264 MP4s. Catalog listing, download authorization and a real 1 KiB `206` range response were verified on 2026-10-25. No paid Cloudflare Container, Queue or custom domain is required. |
@@ -29,8 +29,8 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 
 - The free media workflow accepts only locally prepared H.264 MP4 files. Automatic cloud transcoding is deliberately disabled because it requires paid compute.
 - Account, payment and premium-entitlement workflows remain deliberately disabled; premium media is never served without an entitlement provider.
-- No installer has been built or signed.
-- No payment/OIDC entitlement system or admin authorization policy is deployed.
+- A test-signed QA installer exists under `artifacts/`; there is no production-signed installer release or reproducible production-installer source.
+- No payment/OIDC entitlement system is deployed.
 - No custom Cloudflare zone/domain is attached for public media delivery.
 
 ## Blockers / limitations
