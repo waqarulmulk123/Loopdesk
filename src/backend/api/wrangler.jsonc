@@ -3,12 +3,15 @@
   "compatibility_date": "2026-10-25",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/index.ts",
-  "name": "live-wallpaper-studio-api",
+  "name": "live-wallpaper-studio-api-staging",
+  "d1_databases": [
+    { "binding": "DB", "database_name": "live-wallpaper-studio-staging", "database_id": "5ab5270c-ac52-45c1-aaaf-7cc0b4cee355", "migrations_dir": "../database/migrations-d1" }
+  ],
   "r2_buckets": [
-    { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published" }
+    { "binding": "R2_PUBLISHED", "bucket_name": "live-wallpaper-published-staging" }
   ],
   "vars": {
-    "WORKER_ENVIRONMENT": "development"
+    "WORKER_ENVIRONMENT": "staging"
   },
   "observability": { "enabled": true, "head_sampling_rate": 1 },
   "env": {
