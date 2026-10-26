@@ -19,7 +19,7 @@ cd Loopdesk
 # 2. Check the toolchain (fails fast with a clear message if something is missing)
 .\scripts\bootstrap-windows.ps1
 
-# 3. Create the local app folders (media, downloads, settings live here)
+# 3. Create the local app folders (protected downloads and settings live here)
 .\scripts\setup-windows.ps1
 
 # 4. Build everything and run the tests
@@ -33,10 +33,12 @@ cd Loopdesk
 
 ## First run
 
-1. Copy an H.264 MP4 to `%LOCALAPPDATA%\LiveWallpaperStudio\media`, or use a bundled file under `assets\wallpapers\video\`.
-2. Open the app, go to Library, refresh, or go to Home and paste the video path.
-3. Press Apply wallpaper. The native renderer plays it behind desktop icons.
+1. Open Discover and select a published free wallpaper from the cloud catalog.
+2. Download it. Loopdesk verifies its SHA-256 and size, then stores it in its per-user protected vault.
+3. Open My wallpapers, select the downloaded item, and press Apply selected. The native renderer plays it behind desktop icons.
 4. If attachment is unsupported on your Windows build, the renderer stops with a clear error and leaves the desktop untouched — it never shows a topmost fake wallpaper.
+
+Loopdesk does not import, scan, or display arbitrary local drive files. Local media preparation belongs to the authenticated admin publishing workflow, not the consumer desktop app.
 
 ## Backend setup (optional)
 
@@ -54,6 +56,6 @@ npm test
 
 - **Renderer exe not found:** run `build-desktop.ps1` again; it copies `lws-renderer.exe` next to the app output.
 - **WinUI build fails on TargetFramework:** check the Windows SDK version matches `net10.0-windows10.0.26100.0` and the App SDK package (2.5.1) restored.
-- **Catalog empty in Discover:** `assets/catalog.json` must be next to the app exe, or the app honestly reports "not configured".
+- **Catalog empty in Discover:** verify connectivity to the deployed HTTPS Workers API, then use Refresh catalog. The desktop catalog is cloud-managed; no local `catalog.json` is used.
 - **Video plays but icons are covered:** stop immediately, record OS build / GPU / display config, and file it as a shell-attachment failure — do not ship a workaround that covers icons.
 - **MSIX packaging:** the Store identity is already configured in `src/desktop/LiveWallpaperStudio.App/Package.appxmanifest`. Build the Store MSIX from that project; Microsoft re-signs MSIX packages after Store certification.

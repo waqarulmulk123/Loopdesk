@@ -65,7 +65,7 @@ npm ci
 npm run typecheck
 npm test
 ```
-The deployed staging and production Workers have D1 and published-R2 bindings. Production currently contains five owned, free Loopdesk H.264 MP4 wallpapers. The desktop defaults to the production `workers.dev` API endpoint: select a free item in Discover, download it with SHA-256/size verification, then apply it. Clear the API URL in Settings for offline-only mode.
+The deployed staging and production Workers have D1 and published-R2 bindings. Production currently contains five owned, free Loopdesk H.264 MP4 wallpapers. The desktop uses the production `workers.dev` API endpoint: select a free item in Discover, download it with SHA-256/size verification, then apply it from My wallpapers. The app has no editable catalog URL and does not scan arbitrary local media folders.
 
 ## What is complete, and what is not
 
