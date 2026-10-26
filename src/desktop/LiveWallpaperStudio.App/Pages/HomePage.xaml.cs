@@ -6,7 +6,7 @@ namespace LiveWallpaperStudio.App.Pages;
 
 public sealed partial class HomePage : Page
 {
-    public MainViewModel ViewModel { get; } = new();
+    public HomeViewModel ViewModel { get; } = new();
 
     public HomePage()
     {
@@ -16,4 +16,6 @@ public sealed partial class HomePage : Page
     private void BrowseButton_Click(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(DiscoverPage));
 
     private void LibraryButton_Click(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(LibraryPage));
+
+    private void CatalogItem_Click(object sender, ItemClickEventArgs e) => Frame.Navigate(typeof(DiscoverPage));
 }
