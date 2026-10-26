@@ -31,7 +31,7 @@ A native Windows live-wallpaper application.
 - **Desktop attachment is undocumented and version-sensitive**, especially Windows 11 24H2. Use a version-adaptive `DesktopShellAdapter` with runtime detection, Explorer-restart recovery, and a safe static-wallpaper fallback. Never cover icons or render a topmost fullscreen imitation.
 - **Premium delivery is not "signed R2 URL on a custom domain".** R2 S3 presigned URLs work through the S3 API endpoint, not custom domains. Public assets go on a custom CDN domain; premium assets use private R2 with short-lived authorized delivery and cache keys that respect authorization.
 - **D1 is the deployed public-catalog database.** It is appropriate for the read-mostly catalog. A future accounts, purchases, and complex-entitlement service needs a separately designed transactional datastore; it is not present in this repository.
-- **Legacy Windows 7/8 is a separate edition**, not v1. The main product targets Windows 10 1809+ and Windows 11. .NET 10 does not support Windows 7/8.1.
+- **Legacy Windows 7/8 is a separate edition**, not v1. The package technical floor is Windows 10 1809 (build 17763), but release validation targets Windows 10 22H2 (build 19045) and Windows 11 22H2 or later. .NET 10 does not support Windows 7/8.1.
 - **Signing does not guarantee no SmartScreen prompt.** Azure Artifact Signing (formerly Trusted Signing) eligibility is geographically restricted — check before depending on it.
 
 ## Build order (spec milestones)

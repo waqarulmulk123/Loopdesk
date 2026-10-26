@@ -3,6 +3,7 @@
 #include <cctype>
 #include <iomanip>
 #include <iostream>
+#include <sddl.h>
 #include <sstream>
 #include <vector>
 
@@ -74,11 +75,24 @@ std::string EscapeJsonString(const std::string& value) {
 
 void IpcServer::Run(Handler handler) {
     stopEvent_ = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+    PSECURITY_DESCRIPTOR securityDescriptor = nullptr;
+    // Owner Rights resolves to the renderer process owner (the interactive
+    // user), so another local account cannot open the control pipe.
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            L"D:P(A;;GA;;;OW)", SDDL_REVISION_1, &securityDescriptor, nullptr)) {
+        std::cerr << "IPC security descriptor creation failed: " << GetLastError() << "\n";
+        if (stopEvent_) CloseHandle(stopEvent_);
+        stopEvent_ = nullptr;
+        return;
+    }
+    SECURITY_ATTRIBUTES securityAttributes{};
+    securityAttributes.nLength = sizeof(securityAttributes);
+    securityAttributes.lpSecurityDescriptor = securityDescriptor;
     while (stopEvent_ && WaitForSingleObject(stopEvent_, 0) != WAIT_OBJECT_0) {
         HANDLE pipe = CreateNamedPipeW(
             kPipeName, PIPE_ACCESS_DUPLEX,
             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-            1, 1024 * 1024, 1024 * 1024, 0, nullptr);
+            1, 1024 * 1024, 1024 * 1024, 0, &securityAttributes);
         if (pipe == INVALID_HANDLE_VALUE) break;
         BOOL connected = ConnectNamedPipe(pipe, nullptr) ||
                          GetLastError() == ERROR_PIPE_CONNECTED;
@@ -112,6 +126,7 @@ void IpcServer::Run(Handler handler) {
         CloseHandle(stopEvent_);
         stopEvent_ = nullptr;
     }
+    LocalFree(securityDescriptor);
 }
 
 void IpcServer::Stop() {
