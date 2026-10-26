@@ -41,6 +41,10 @@ On a Windows desktop, run:
 .\scripts\test-renderer-desktop-attachment.ps1 -VideoPath .\assets\wallpapers\loopdesk\loopdesk_aurora_dreamscape.mp4
 ```
 
+Add `-RestartExplorer` to perform the structural Explorer-restart check. It
+briefly restarts the Windows shell and passes only when the renderer recreates
+its wallpaper window under a non-icon-hosting `WorkerW` and frames continue.
+
 The script fails unless the real renderer window is a child of a `WorkerW`
 that does not host `SHELLDLL_DefView` (the desktop-icon view), then confirms
 that decoded frames advance and that shutdown is clean. It is a structural
