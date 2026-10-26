@@ -14,8 +14,21 @@ public sealed class OnlineCatalogService
         if (!Uri.TryCreate(baseUrl.TrimEnd('/') + "/", UriKind.Absolute, out var baseUri) || baseUri.Scheme != Uri.UriSchemeHttps)
             throw new InvalidOperationException("Online catalog URL must use HTTPS.");
 
-        var response = await _http.GetFromJsonAsync<CatalogResponse>(new Uri(baseUri, "v1/wallpapers?limit=100"), cancellationToken);
-        return response?.Items ?? [];
+        var items = new List<OnlineCatalogItem>();
+        string? cursor = null;
+        const int maximumPages = 20;
+        for (int pageNumber = 0; pageNumber < maximumPages; pageNumber++)
+        {
+            string path = cursor is null
+                ? "v1/wallpapers?limit=100"
+                : $"v1/wallpapers?limit=100&cursor={Uri.EscapeDataString(cursor)}";
+            CatalogResponse? response = await _http.GetFromJsonAsync<CatalogResponse>(new Uri(baseUri, path), cancellationToken);
+            if (response is null) break;
+            items.AddRange(response.Items ?? []);
+            if (string.IsNullOrWhiteSpace(response.NextCursor)) return items;
+            cursor = response.NextCursor;
+        }
+        throw new InvalidOperationException("The online catalog returned too many pages.");
     }
 
     public async Task<OnlineDownload> GetDownloadAsync(string baseUrl, string wallpaperId, CancellationToken cancellationToken = default)
@@ -54,7 +67,9 @@ public sealed class OnlineCatalogService
         return baseUri;
     }
 
-    private sealed record CatalogResponse(List<OnlineCatalogItem>? Items);
+    private sealed record CatalogResponse(
+        List<OnlineCatalogItem>? Items,
+        [property: JsonPropertyName("nextCursor")] string? NextCursor);
     private sealed record WallpaperDetail(OnlineCatalogItem Item, List<OnlineVariant> Variants);
     private sealed record DownloadAuthorization(string DownloadUrl);
 }
