@@ -124,8 +124,14 @@ public sealed partial class DiscoverViewModel : ObservableObject
                 "Loopdesk", "staging");
             finalPath = Path.Combine(stagingDirectory, safeName + ".mp4");
             var manager = new DownloadManager();
+            var progress = new Progress<(long Done, long? Total)>(value =>
+            {
+                CatalogStatus = value.Total is > 0
+                    ? $"Downloading {selected.Title}: {value.Done * 100 / value.Total.Value}%…"
+                    : $"Downloading {selected.Title}…";
+            });
             DownloadResult result = await manager.DownloadAsync(download.DownloadUri.ToString(), finalPath + ".partial", finalPath,
-                download.Variant.Sha256, download.Variant.SizeBytes);
+                download.Variant.Sha256, download.Variant.SizeBytes, progress);
             if (!result.Success)
             {
                 CatalogStatus = $"Download failed: {result.FailureReason}";
@@ -135,8 +141,11 @@ public sealed partial class DiscoverViewModel : ObservableObject
             await DownloadedWallpaperService.Instance.SaveAsync(finalPath, selected.Id, selected.Title);
             saved = true;
             int index = CatalogItems.IndexOf(selected);
-            CatalogItems[index] = selected with { IsDownloaded = true };
-            SelectedItem = CatalogItems[index];
+            if (index >= 0)
+            {
+                CatalogItems[index] = selected with { IsDownloaded = true };
+                SelectedItem = CatalogItems[index];
+            }
             CatalogStatus = $"Downloaded {selected.Title}. It is protected in your Loopdesk vault; preview or apply it from My wallpapers.";
         }
         catch (Exception)

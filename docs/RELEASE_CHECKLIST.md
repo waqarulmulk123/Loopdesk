@@ -6,7 +6,7 @@ is actually true on real Windows hardware. GitHub Actions verifies the desktop b
 - [ ] Native WinUI app compiles and launches on actual target Windows
 - [ ] Native renderer compiles for x64 and actually plays moving video behind icons
 - [ ] Wallpaper window does not steal focus, block icons, or obscure the desktop in tested configurations
-- [ ] Local imports work, valid media plays, invalid media fails safely
+- [x] Arbitrary local imports and path scanning are intentionally absent; only protected cloud downloads can be applied
 - [ ] Loop, fit modes, pause/resume, tray, startup preference, multi-monitor and crash handling tested
 - [ ] Offline launch and previously downloaded media playback verified
 - [ ] SQLite persistent settings/cache survive reboots and crash scenarios

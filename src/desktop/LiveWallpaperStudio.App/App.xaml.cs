@@ -13,6 +13,7 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        Services.DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
         _window = new MainWindow();
         _window.Closed += (_, _) => Services.RenderSupervisor.Instance.Stop();
         _window.Activate();

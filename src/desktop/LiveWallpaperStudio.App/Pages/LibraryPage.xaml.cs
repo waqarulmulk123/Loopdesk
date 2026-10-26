@@ -22,4 +22,11 @@ public sealed partial class LibraryPage : Page
         PreviewPlayer.Source = MediaSource.CreateFromUri(new Uri(path));
         PreviewPlayer.MediaPlayer?.Play();
     }
+
+    private void RemoveButton_Click(object sender, RoutedEventArgs e)
+    {
+        PreviewPlayer.MediaPlayer?.Pause();
+        PreviewPlayer.Source = null;
+        ViewModel.RemoveSelectedCommand.Execute(null);
+    }
 }

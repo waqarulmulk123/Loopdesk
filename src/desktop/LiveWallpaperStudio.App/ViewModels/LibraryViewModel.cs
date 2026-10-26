@@ -81,4 +81,27 @@ public sealed partial class LibraryViewModel : ObservableObject
         RenderSupervisor.Instance.Stop();
         Status = "Wallpaper stopped.";
     }
+
+    [RelayCommand]
+    private void RemoveSelected()
+    {
+        if (SelectedMedia is null)
+        {
+            Status = "Select a downloaded wallpaper first.";
+            return;
+        }
+
+        try
+        {
+            string title = SelectedMedia.Title;
+            RenderSupervisor.Instance.Stop();
+            DownloadedWallpaperService.Instance.Remove(SelectedMedia);
+            Refresh();
+            Status = $"Removed {title} from this device.";
+        }
+        catch (Exception)
+        {
+            Status = "Could not remove this download. Try again after stopping playback.";
+        }
+    }
 }
