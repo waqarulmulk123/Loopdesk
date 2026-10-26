@@ -36,6 +36,13 @@ test('health endpoint returns the public API contract', async () => {
   assert.deepEqual(await response.json(), { status: 'ok', apiVersion: 'v1', build: '0.2.0' });
 });
 
+test('privacy policy is publicly available without catalog bindings', async () => {
+  const response = await app.fetch(new Request('https://api.test/privacy'), env);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+  assert.match(await response.text(), /Loopdesk Privacy Policy/);
+});
+
 test('catalog is empty without a database and rejects invalid limits', async () => {
   const catalog = await app.fetch(new Request('https://api.test/v1/wallpapers'), env);
   assert.equal(catalog.status, 200);
