@@ -99,13 +99,17 @@ public sealed partial class DiscoverViewModel : ObservableObject
             CatalogStatus = "Select a wallpaper to download.";
             return;
         }
+        string? finalPath = null;
+        bool saved = false;
         try
         {
             CatalogStatus = $"Authorizing {selected.Title}…";
             OnlineDownload download = await _onlineCatalog.GetDownloadAsync(LocalSettingsService.ProductionApiBaseUrl, selected.Id);
             string safeName = string.Concat(selected.Id.Where(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_'));
-            string stagingDirectory = Path.Combine(Path.GetTempPath(), "Loopdesk", "downloads");
-            string finalPath = Path.Combine(stagingDirectory, safeName + ".mp4");
+            string stagingDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Loopdesk", "staging");
+            finalPath = Path.Combine(stagingDirectory, safeName + ".mp4");
             var manager = new DownloadManager();
             DownloadResult result = await manager.DownloadAsync(download.DownloadUri.ToString(), finalPath + ".partial", finalPath,
                 download.Variant.Sha256, download.Variant.SizeBytes);
@@ -116,15 +120,29 @@ public sealed partial class DiscoverViewModel : ObservableObject
             }
 
             await DownloadedWallpaperService.Instance.SaveAsync(finalPath, selected.Id, selected.Title);
+            saved = true;
             int index = CatalogItems.IndexOf(selected);
             CatalogItems[index] = selected with { IsDownloaded = true };
             SelectedItem = CatalogItems[index];
             CatalogStatus = $"Downloaded {selected.Title}. It is protected in your Loopdesk vault; preview or apply it from My wallpapers.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            CatalogStatus = $"Download unavailable: {ex.Message}";
+            CatalogStatus = "Download unavailable. Check your connection and try again.";
         }
+        finally
+        {
+            if (!saved && finalPath is not null)
+            {
+                TryDelete(finalPath);
+                TryDelete(finalPath + ".partial");
+            }
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try { File.Delete(path); } catch (IOException) { }
     }
 
     [RelayCommand]

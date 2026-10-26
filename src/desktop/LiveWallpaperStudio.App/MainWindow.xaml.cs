@@ -23,7 +23,9 @@ public sealed partial class MainWindow : Window
             return;
         }
         ContentFrame.Navigate(typeof(HomePage));
-        NavView.SelectedItem = NavView.MenuItems[0];
+        NavView.SelectedItem = NavView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(item => string.Equals(item.Tag as string, "Home", StringComparison.Ordinal));
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

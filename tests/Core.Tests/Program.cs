@@ -41,6 +41,15 @@ Check(DownloadManager.ComputeSha256Hex(System.Text.Encoding.UTF8.GetBytes("abc")
     "SHA-256 of 'abc' matches the known test vector");
 Check(CacheService.CacheFileName("abc123", ".mp4") == "abc123.mp4", "cache file name is sha256 + extension");
 
+var insecureResult = await new DownloadManager().DownloadAsync(
+    "http://example.invalid/video.mp4",
+    Path.Combine(Path.GetTempPath(), "LiveWallpaperStudio-tests", "insecure.partial"),
+    Path.Combine(Path.GetTempPath(), "LiveWallpaperStudio-tests", "insecure.mp4"),
+    null,
+    null);
+Check(!insecureResult.Success && insecureResult.FailureReason == "Download source must use HTTPS.",
+    "download rejects non-HTTPS sources before creating files");
+
 var downloadRoot = Path.Combine(Path.GetTempPath(), "LiveWallpaperStudio-tests", Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(downloadRoot);
 try
