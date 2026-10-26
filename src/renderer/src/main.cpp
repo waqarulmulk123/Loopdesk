@@ -82,41 +82,34 @@ int RunVideo(const std::wstring& videoPath) {
         return 1;
     }
 
-    HMONITOR primary = MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFO monitorInfo{};
-    monitorInfo.cbSize = sizeof(monitorInfo);
-    if (!primary || !GetMonitorInfoW(primary, &monitorInfo)) {
-        std::cout << "Failed to resolve the primary monitor bounds.\n";
-        if (comInitialized) CoUninitialize();
-        return 1;
-    }
-    const int width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
-    const int height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
-
     lws::DesktopWindow window;
-    if (!window.Create(primary, width, height)) {
-        std::cout << "Failed to create wallpaper window.\n";
-        if (comInitialized) CoUninitialize();
-        return 1;
-    }
-
     lws::DesktopShellAdapter adapter;
-    auto attach = adapter.TryAttach(window.Handle(), primary);
-    if (!attach.success) {
-        std::wcout << L"ShellAttachmentUnsupported: " << attach.diagnostics << L"\n";
-        window.Destroy();
+    lws::SwapChainPresenter presenter;
+    auto createAttachedWindow = [&]() -> bool {
+        HMONITOR primary = MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO monitorInfo{};
+        monitorInfo.cbSize = sizeof(monitorInfo);
+        if (!primary || !GetMonitorInfoW(primary, &monitorInfo)) return false;
+        const int width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+        const int height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+        if (!window.Create(primary, width, height)) return false;
+        auto attach = adapter.TryAttach(window.Handle(), primary);
+        if (!attach.success) {
+            std::wcout << L"ShellAttachmentUnsupported: " << attach.diagnostics << L"\n";
+            window.Destroy();
+            return false;
+        }
+        if (!presenter.Create(device.Device(), window.Handle(), width, height)) {
+            adapter.Detach(window.Handle());
+            window.Destroy();
+            return false;
+        }
+        std::wcout << L"Attached via " << attach.strategyName << L"\n";
+        return true;
+    };
+    if (!createAttachedWindow()) {
         if (comInitialized) CoUninitialize();
         return 2;
-    }
-    std::wcout << L"Attached via " << attach.strategyName << L"\n";
-
-    lws::SwapChainPresenter presenter;
-    if (!presenter.Create(device.Device(), window.Handle(), width, height)) {
-        std::cout << "Failed to create swap chain presenter.\n";
-        adapter.Detach(window.Handle());
-        window.Destroy();
-        if (comInitialized) CoUninitialize();
-        return 1;
     }
 
     // VideoPlayer is heap-allocated because it is COM ref-counted.
@@ -142,6 +135,7 @@ int RunVideo(const std::wstring& videoPath) {
     lws::PlaybackPolicy policy(lws::PausePolicy{});
     MSG msg{};
     bool running = true;
+    DWORD lastReattachAttempt = 0;
     while (running && !g_shutdownRequested.load()) {
         while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) running = false;
@@ -150,7 +144,18 @@ int RunVideo(const std::wstring& videoPath) {
         }
         if (!running) break;
         if (device.IsLost() || player->HasError()) break;
-        if (!g_paused.load() && !policy.ShouldPause(primary, false, false, false, false)) {
+        if (!IsWindow(window.Handle())) {
+            const DWORD now = GetTickCount();
+            if (now - lastReattachAttempt >= 1000) {
+                lastReattachAttempt = now;
+                presenter.Destroy();
+                window.Destroy();
+                createAttachedWindow();
+            }
+            Sleep(16);
+            continue;
+        }
+        if (!g_paused.load() && !policy.ShouldPause(window.Monitor(), false, false, false, false)) {
             if (player->Tick(presenter.BackBuffer())) {
                 presenter.Present();
             }

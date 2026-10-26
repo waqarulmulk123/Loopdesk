@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$VideoPath,
-    [string]$RendererPath = ''
+    [string]$RendererPath = '',
+    [switch]$RestartExplorer
 )
 
 $ErrorActionPreference = 'Stop'
@@ -123,6 +124,23 @@ try {
         throw 'Wallpaper was attached to the icon-hosting WorkerW, which would risk obscuring icons.'
     }
 
+    if ($RestartExplorer) {
+        Stop-Process -Name explorer -Force -ErrorAction Stop
+        Start-Sleep -Seconds 2
+        Start-Process explorer.exe
+        Start-Sleep -Seconds 5
+        if ($process.HasExited) { throw "Renderer exited after Explorer restart with code $($process.ExitCode)." }
+        $wallpaper = [DesktopWindowProbe]::FindWindowForProcess($process.Id, 'LwsWallpaperWindow')
+        if ($wallpaper -eq [IntPtr]::Zero) { throw 'Renderer lost its wallpaper HWND after Explorer restart.' }
+        $parent = [DesktopWindowProbe]::GetParent($wallpaper)
+        if ($parent -eq [IntPtr]::Zero -or [DesktopWindowProbe]::GetClass($parent) -ne 'WorkerW') {
+            throw 'Wallpaper HWND is not parented to WorkerW after Explorer restart.'
+        }
+        if ([DesktopWindowProbe]::HasChildClass($parent, 'SHELLDLL_DefView')) {
+            throw 'Wallpaper was attached to the icon-hosting WorkerW after Explorer restart.'
+        }
+    }
+
     $first = Invoke-RendererRequest '{"protocolVersion":1,"requestId":"desktop-1","method":"engine.status","payload":{}}'
     Start-Sleep -Seconds 3
     $second = Invoke-RendererRequest '{"protocolVersion":1,"requestId":"desktop-2","method":"engine.status","payload":{}}'
@@ -136,6 +154,7 @@ try {
         IconHost = $false
         FirstFrame = $first.payload.frames
         SecondFrame = $second.payload.frames
+        ExplorerRestarted = [bool]$RestartExplorer
         ExitCode = $process.ExitCode
     }
 } finally {

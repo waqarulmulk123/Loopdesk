@@ -1,13 +1,18 @@
 # Windows build script. Run on Windows, not on Linux.
 # Requires: .NET 10 SDK, CMake, and an MSVC developer environment.
 $ErrorActionPreference = "Stop"
+$cmake = (Get-Command cmake -ErrorAction SilentlyContinue).Source
+if (-not $cmake) {
+    $cmake = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+}
+if (-not (Test-Path -LiteralPath $cmake)) { throw "CMake was not found. Install CMake or Visual Studio Desktop C++ tools." }
 
 dotnet build src/desktop/LiveWallpaperStudio.Core/LiveWallpaperStudio.Core.csproj -c Release
 dotnet build src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -p:Platform=x64
 dotnet run --project tests/Core.Tests/Core.Tests.csproj -c Release
 
-cmake -S src/renderer -B build/renderer -DCMAKE_BUILD_TYPE=Release
-cmake --build build/renderer --config Release
+& $cmake -S src/renderer -B build/renderer -DCMAKE_BUILD_TYPE=Release
+& $cmake --build build/renderer --config Release
 
 # The supervisor looks for lws-renderer.exe next to the app output. Use the
 # target framework's Release output, not an arbitrary historical build folder.

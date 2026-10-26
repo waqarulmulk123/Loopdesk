@@ -9,6 +9,6 @@ Run these tests on a physical Windows installation before release. Automated bui
 - [ ] Disconnect the network; confirm the catalog error state and existing downloaded wallpapers remain usable.
 - [ ] Lock/unlock, full-screen app, display-off, battery-saver, and remote-session pause behavior after those policies are implemented.
 - [ ] Attach and remove a second monitor; verify per-display assignment and hot-plug behavior after multi-monitor support is implemented.
-- [ ] Restart Explorer, change display resolution/DPI, and exercise GPU reset recovery after resilience support is implemented.
+- [ ] Restart Explorer and confirm icon click/drag behavior manually; the renderer structural reattach proof passed on Windows 10 build 19045, while display-resolution/DPI and GPU-reset recovery remain untested.
 - [ ] Test keyboard-only navigation, Narrator labels, and 100%, 125%, 150%, and 200% display scaling.
 - [ ] Install and uninstall the MSIX on a clean Windows machine.

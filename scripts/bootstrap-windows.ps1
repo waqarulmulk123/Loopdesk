@@ -10,7 +10,11 @@ function Test-Command($name) {
 
 $missing = @()
 if (-not (Test-Command "dotnet")) { $missing += "dotnet (.NET 10 SDK)" }
-if (-not (Test-Command "cmake")) { $missing += "cmake" }
+$cmake = (Get-Command cmake -ErrorAction SilentlyContinue).Source
+if (-not $cmake) {
+    $cmake = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+}
+if (-not (Test-Path -LiteralPath $cmake)) { $missing += "cmake" }
 if (-not (Test-Command "git")) { $missing += "git" }
 
 if ($missing.Count -gt 0) {
@@ -24,5 +28,5 @@ if ($missing.Count -gt 0) {
 }
 
 dotnet --version
-cmake --version | Select-Object -First 1
+& $cmake --version | Select-Object -First 1
 Write-Host "Bootstrap checks OK."

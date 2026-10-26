@@ -8,10 +8,9 @@ const wchar_t kClassName[] = L"LwsWallpaperWindow";
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     if (msg == WM_NCHITTEST) return HTTRANSPARENT;
     if (msg == WM_MOUSEACTIVATE) return MA_NOACTIVATE;
-    if (msg == WM_DESTROY) {
-        PostQuitMessage(0);
-        return 0;
-    }
+    // Explorer destroys WorkerW children during a shell restart. The render
+    // loop recreates this window after detecting the invalid handle.
+    if (msg == WM_DESTROY) return 0;
     return DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 
@@ -55,7 +54,7 @@ bool DesktopWindow::Create(HMONITOR monitor, int width, int height) {
 
 void DesktopWindow::Destroy() {
     if (hwnd_) {
-        DestroyWindow(hwnd_);
+        if (IsWindow(hwnd_)) DestroyWindow(hwnd_);
         hwnd_ = nullptr;
     }
     monitor_ = nullptr;

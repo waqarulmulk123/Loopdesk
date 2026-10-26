@@ -8,7 +8,7 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 |---|---|---|
 | M0 — Environment, source, feasibility | CI verified; physical validation pending | GitHub Actions builds the .NET components and native renderer, runs the .NET harness, and starts the renderer. |
 | M1 — Minimal real desktop video wallpaper | Physical playback verified | On 2026-10-26, the Release renderer attached its real `LwsWallpaperWindow` to a non-icon-hosting `WorkerW`, decoded/presented the owned H.264 sample (IPC frames 104 → 203), and shut down with exit 0 on Windows 10 Pro 19045 / Intel HD Graphics 620 (driver 31.0.101.2140). `scripts/test-renderer-desktop-attachment.ps1` reproduces this proof. |
-| M2 — Reliable engine, multi-monitor | Single-monitor verified; multi-monitor pending | The renderer, IPC and display model are exercised on one 1920x1080 display. Explorer-restart, device-loss and true multi-monitor assignment require the corresponding physical display/event configurations. |
+| M2 — Reliable engine, multi-monitor | Explorer restart verified; multi-monitor pending | On 2026-10-26, the renderer recreated its wallpaper child after an Explorer restart, reattached to a non-icon-hosting `WorkerW`, advanced frames 251 → 349, and shut down with exit 0 on the single tested display. Device-loss and true multi-monitor assignment still require their corresponding physical configurations. |
 | M3 — Windows application | Build and renderer acceptance verified | Discover is cloud-only. It downloads a selected free Cloudflare MP4, verifies SHA-256/size, protects it per Windows user with DPAPI, and exposes preview/apply only from My wallpapers. The UI never scans or displays drive paths. |
 | M4 — Free Cloudflare backend | Deployed and verified | Production Worker, D1 and R2 publish five owned free H.264 MP4s. Catalog listing, download authorization and a real 1 KiB `206` range response were verified on 2026-10-25. No paid Cloudflare Container, Queue or custom domain is required. |
 | M5 — Production UX, security, install, tests | CI verified; signing/physical install pending | Backend, processor and Windows desktop GitHub workflows passed for commit `43b4427`. A signed installer and clean-machine install evidence still require publisher-owned signing credentials and a physical test machine. |
@@ -35,6 +35,6 @@ The source is on GitHub and the Cloudflare catalog infrastructure is deployed. G
 
 ## Blockers / limitations
 
-- The renderer attachment/playback proof passed on one Windows 10 / Intel HD Graphics 620 system with a single 1920x1080 monitor. Display-change, Explorer-restart, multi-monitor, visual icon click/drag, and install/uninstall acceptance still require their corresponding physical configurations.
+- The renderer attachment/playback and structural Explorer-restart proofs passed on one Windows 10 / Intel HD Graphics 620 system with a single 1280x720 display. Display-change, multi-monitor, visual icon click/drag, and install/uninstall acceptance still require their corresponding physical configurations.
 - Code signing requires a certificate/account owned by the release publisher.
 - No automatic cloud transcoding is available on the free tier; creators prepare video locally with FFmpeg before upload.
