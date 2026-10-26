@@ -2,12 +2,89 @@
     x:Class="LiveWallpaperStudio.App.Pages.DiagnosticsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Padding="28">
+    <Grid Padding="46,34,46,26" Background="{StaticResource ShellBackgroundBrush}">
         <Grid.Transitions>
             <TransitionCollection>
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
-        <StackPanel Spacing="20"><Grid><StackPanel Spacing="4"><TextBlock Text="Diagnostics" Style="{StaticResource TitleTextBlockStyle}" /><TextBlock Text="Live application, renderer, and catalog information." Opacity="0.72" /></StackPanel><Button Content="Refresh diagnostics" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{x:Bind ViewModel.RefreshCommand}" /></Grid><Grid ColumnSpacing="16" RowSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions><Border Background="{StaticResource PremiumCardBrush}" CornerRadius="14" Padding="18"><StackPanel Spacing="6"><TextBlock Text="App version" Opacity="0.65" /><TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" /></StackPanel></Border><Border Grid.Column="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="14" Padding="18"><StackPanel Spacing="6"><TextBlock Text="Renderer" Opacity="0.65" /><TextBlock Text="{x:Bind ViewModel.RendererStatus, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" /></StackPanel></Border><Border Grid.Row="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="14" Padding="18"><StackPanel Spacing="6"><TextBlock Text="Operating system" Opacity="0.65" /><TextBlock Text="{x:Bind ViewModel.OsVersion, Mode=OneWay}" TextWrapping="Wrap" /></StackPanel></Border><Border Grid.Row="1" Grid.Column="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="14" Padding="18"><StackPanel Spacing="6"><TextBlock Text="Catalog" Opacity="0.65" /><TextBlock Text="{x:Bind ViewModel.CatalogStatus, Mode=OneWay}" TextWrapping="Wrap" /></StackPanel></Border><Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource PremiumCardBrush}" CornerRadius="14" Padding="18"><StackPanel Spacing="6"><TextBlock Text="Storage" Opacity="0.65" /><TextBlock Text="{x:Bind ViewModel.StorageStatus, Mode=OneWay}" TextWrapping="Wrap" /></StackPanel></Border></Grid></StackPanel>
+        <StackPanel Spacing="22" MaxWidth="1300">
+            <Grid>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="SYSTEM HEALTH" Style="{StaticResource PageEyebrowTextBlockStyle}" />
+                    <TextBlock Text="Diagnostics" Style="{StaticResource PageTitleTextBlockStyle}" />
+                    <TextBlock Text="Inspect the renderer, system details and catalog connection." Style="{StaticResource PageSubtitleTextBlockStyle}" />
+                </StackPanel>
+                <Button Content="↻ Refresh diagnostics"
+                        Style="{StaticResource AccentButtonStyle}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Command="{x:Bind ViewModel.RefreshCommand}" />
+            </Grid>
+
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Renderer" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.RendererStatus, Mode=OneWay}" FontSize="21" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="Native Windows renderer" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="13" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Cloud catalog" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.CatalogStatus, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="HTTPS-only source" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="13" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Playback mode" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="D3D11" FontSize="21" FontWeight="SemiBold" />
+                        <TextBlock Text="Native rendering" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="13" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="App version" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Operating system" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.OsVersion, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Protected storage" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.StorageStatus, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PageCardStyle}" Padding="22">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Diagnostic checks" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
+                        <TextBlock Text="No local folders are scanned." FontSize="18" FontWeight="SemiBold" Foreground="#FF6DF7DF" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
     </Grid>
 </Page>
