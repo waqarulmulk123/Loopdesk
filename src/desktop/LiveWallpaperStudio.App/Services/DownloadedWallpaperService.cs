@@ -76,6 +76,16 @@ public sealed class DownloadedWallpaperService
         return path;
     }
 
+    public void Remove(DownloadedWallpaper wallpaper)
+    {
+        if (!IsSafeId(wallpaper.Id)) throw new InvalidOperationException("Invalid downloaded wallpaper identifier.");
+        File.Delete(GetVaultPath(wallpaper.Id));
+        var remaining = List().Where(item => !string.Equals(item.Id, wallpaper.Id, StringComparison.Ordinal)).ToList();
+        string temporaryPath = IndexPath + ".partial";
+        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(remaining, JsonOptions));
+        File.Move(temporaryPath, IndexPath, overwrite: true);
+    }
+
     public void CleanupPlaybackCopies()
     {
         if (!Directory.Exists(PlaybackDirectory)) return;
