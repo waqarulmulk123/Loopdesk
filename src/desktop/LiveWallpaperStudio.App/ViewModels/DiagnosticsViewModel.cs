@@ -8,7 +8,7 @@ public sealed partial class DiagnosticsViewModel : ObservableObject
 {
     public DiagnosticsViewModel() => Refresh();
 
-    [ObservableProperty] private string _appVersion = "1.0.0-dev";
+    [ObservableProperty] private string _appVersion = typeof(DiagnosticsViewModel).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
     [ObservableProperty] private string _osVersion = Environment.OSVersion.ToString();
     [ObservableProperty] private string _rendererStatus = "Unknown";
     [ObservableProperty] private string _storageStatus = string.Empty;

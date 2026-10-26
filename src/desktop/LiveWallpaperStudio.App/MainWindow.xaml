@@ -25,9 +25,6 @@
                     <TextBlock x:Name="BreadcrumbPage" Text="Home" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Border Background="#FF10223A" BorderBrush="#FF184863" BorderThickness="1" CornerRadius="16" Padding="14,6">
-                        <TextBlock Text="DESIGN CONCEPT" Foreground="{StaticResource PremiumAccentBrush}" FontSize="11" FontWeight="SemiBold" CharacterSpacing="80" />
-                    </Border>
                     <Border Background="#FF101C36" BorderBrush="#FF2A4169" BorderThickness="1" CornerRadius="16" Padding="14,6">
                         <TextBlock Text="Windows desktop" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" />
                     </Border>
@@ -64,7 +61,7 @@
                     <Ellipse x:Name="RendererStatusDot" Width="8" Height="8" Fill="#FFE5A33D" VerticalAlignment="Center" />
                     <TextBlock x:Name="RendererStatusText" Text="Renderer service • Not running" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" />
                 </StackPanel>
-                <TextBlock Text="UI CONCEPT • NOT A LIVE SCREENSHOT" Foreground="#FF7789AA" FontSize="11" TextWrapping="Wrap" />
+                <TextBlock Text="{x:Bind AppVersion}" Foreground="#FF7789AA" FontSize="11" />
             </StackPanel>
         </NavigationView.PaneFooter>
         <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" />
