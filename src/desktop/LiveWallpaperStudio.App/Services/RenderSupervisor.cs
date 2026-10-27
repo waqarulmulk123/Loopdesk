@@ -13,18 +13,39 @@ public sealed class RenderSupervisor
 {
     public static RenderSupervisor Instance { get; } = new();
 
+    private const int MaximumUnexpectedExits = 3;
+    private readonly object _gate = new();
     private Process? _process;
     private int _unexpectedExits;
     private bool _stopping;
+    private int _generation;
+    private string? _activeVideoPath;
 
     public string? LastError { get; private set; }
 
-    public bool IsRunning => _process is { HasExited: false };
+    public bool IsRunning
+    {
+        get
+        {
+            lock (_gate) return _process is { HasExited: false };
+        }
+    }
 
     public bool Start(string videoPath)
     {
-        Stop(cleanupPlaybackCopies: false);
-        LastError = null;
+        lock (_gate)
+        {
+            _generation++;
+            StopCore(cleanupPlaybackCopies: false);
+            _unexpectedExits = 0;
+            _activeVideoPath = videoPath;
+            LastError = null;
+            return StartCore(videoPath);
+        }
+    }
+
+    private bool StartCore(string videoPath)
+    {
         if (!File.Exists(videoPath))
         {
             LastError = "The selected video no longer exists.";
@@ -72,15 +93,62 @@ public sealed class RenderSupervisor
             return false;
         }
 
-        _process.EnableRaisingEvents = true;
-        _process.Exited += (sender, _) =>
+        Process started = _process;
+        started.EnableRaisingEvents = true;
+        started.Exited += (_, _) =>
         {
-            if (!_stopping && ReferenceEquals(sender, _process)) _unexpectedExits++;
+            HandleUnexpectedExit(started);
         };
         return true;
     }
 
+    private void HandleUnexpectedExit(Process exitedProcess)
+    {
+        string? path;
+        int generation;
+        int failures;
+        lock (_gate)
+        {
+            if (_stopping || !ReferenceEquals(exitedProcess, _process)) return;
+            _process = null;
+            exitedProcess.Dispose();
+            path = _activeVideoPath;
+            generation = _generation;
+            failures = ++_unexpectedExits;
+            if (failures >= MaximumUnexpectedExits)
+            {
+                LastError = "Renderer stopped repeatedly. Reapply the wallpaper after checking your display and graphics driver.";
+                return;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(path)) _ = RestartAfterUnexpectedExitAsync(path, generation, failures);
+    }
+
+    private async Task RestartAfterUnexpectedExitAsync(string videoPath, int generation, int failures)
+    {
+        // 1s then 2s: recover short Explorer/GPU transitions without a busy loop.
+        await Task.Delay(TimeSpan.FromSeconds(1 << (failures - 1)));
+        lock (_gate)
+        {
+            if (_stopping || generation != _generation || IsRunning) return;
+            if (!StartCore(videoPath) && generation == _generation)
+            {
+                LastError ??= "Renderer could not restart.";
+            }
+        }
+    }
+
     public void Stop(bool cleanupPlaybackCopies = true)
+    {
+        lock (_gate)
+        {
+            _generation++;
+            StopCore(cleanupPlaybackCopies);
+        }
+    }
+
+    private void StopCore(bool cleanupPlaybackCopies)
     {
         _stopping = true;
         if (_process is { HasExited: false })
@@ -96,10 +164,11 @@ public sealed class RenderSupervisor
         }
         _process?.Dispose();
         _process = null;
+        _activeVideoPath = null;
         if (cleanupPlaybackCopies) DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
         _unexpectedExits = 0;
         _stopping = false;
     }
 
-    public bool ShouldRestartAfterUnexpectedExit() => _unexpectedExits < 3;
+    public bool ShouldRestartAfterUnexpectedExit() => _unexpectedExits < MaximumUnexpectedExits;
 }
