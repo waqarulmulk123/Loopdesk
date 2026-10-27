@@ -10,6 +10,7 @@
         </Grid.Transitions>
         <ScrollViewer>
             <StackPanel Spacing="20">
+                <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="Keep your wallpaper running" Message="Closing the window keeps Loopdesk in the notification area. Use its tray icon to reopen the app, stop the wallpaper, or exit Loopdesk." />
                 <StackPanel Spacing="8"><TextBlock Text="PREFERENCES" Style="{StaticResource PageEyebrowTextBlockStyle}" /><TextBlock Text="Settings" Style="{StaticResource PageTitleTextBlockStyle}" /><TextBlock Text="Review current playback and privacy behavior." Style="{StaticResource PageSubtitleTextBlockStyle}" /></StackPanel>
                 <Grid ColumnSpacing="20"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                     <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20"><StackPanel Spacing="10"><TextBlock Text="Playback &amp; performance" Style="{StaticResource SubtitleTextBlockStyle}" /><TextBlock Text="Wallpapers start muted." FontWeight="SemiBold" /><TextBlock Text="Pause and performance controls are not exposed until the native renderer can apply them. The current renderer targets the primary desktop." Opacity="0.68" TextWrapping="Wrap" /></StackPanel></Border>

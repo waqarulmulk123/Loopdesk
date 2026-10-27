@@ -10,18 +10,21 @@
         </Grid.Transitions>
         <ScrollViewer>
             <StackPanel Spacing="26" MaxWidth="1300">
-                <Grid>
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel Spacing="8">
                         <TextBlock Text="YOUR DESKTOP" Style="{StaticResource PageEyebrowTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.Greeting, Mode=OneWay}" Style="{StaticResource PageTitleTextBlockStyle}" />
                         <TextBlock Text="Make your desktop a space you love." Style="{StaticResource PageSubtitleTextBlockStyle}" />
                     </StackPanel>
-                    <Button Content="Browse wallpapers" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BrowseButton_Click" />
+                    <Button Grid.Column="1" Content="Browse wallpapers" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BrowseButton_Click" />
                 </Grid>
 
-                <Grid Height="328">
+                <Grid MinHeight="328">
                     <Border CornerRadius="20" Background="{StaticResource HomeHeroBrush}" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" />
-                    <Image Source="{x:Bind ViewModel.FeaturedPosterUri, Mode=OneWay}" Stretch="UniformToFill" HorizontalAlignment="Right" Width="760" Opacity="0.78" />
+                    <Image Stretch="UniformToFill" Opacity="0.78">
+                        <Image.Source><BitmapImage UriSource="{x:Bind ViewModel.FeaturedPosterUri, Mode=OneWay}" DecodePixelWidth="1200" /></Image.Source>
+                    </Image>
                     <Border CornerRadius="20" Background="{StaticResource HomeHeroOverlayBrush}" />
                     <StackPanel Margin="36,42,36,34" VerticalAlignment="Center" Spacing="14" MaxWidth="600">
                         <Border Background="#FF063E4A" CornerRadius="15" Padding="12,6" HorizontalAlignment="Left">
@@ -36,9 +39,10 @@
                     </StackPanel>
                 </Grid>
 
-                <Grid>
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <TextBlock Text="Explore the collection" FontSize="22" FontWeight="SemiBold" />
-                    <Button Content="Browse Discover →" HorizontalAlignment="Right" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="12,6" Click="BrowseButton_Click" />
+                    <Button Grid.Column="1" Content="Browse Discover →" HorizontalAlignment="Right" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="12,6" Click="BrowseButton_Click" />
                 </Grid>
 
                 <GridView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"

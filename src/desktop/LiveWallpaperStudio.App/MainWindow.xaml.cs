@@ -72,6 +72,9 @@ public sealed partial class MainWindow : Window
 
     private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
     {
+        NavView.SelectedItem = NavView.MenuItems.OfType<NavigationViewItem>()
+            .FirstOrDefault(item => string.Equals(item.Tag as string,
+                e.SourcePageType.Name.Replace("Page", string.Empty), StringComparison.Ordinal));
         BreadcrumbPage.Text = e.SourcePageType.Name.Replace("Page", string.Empty) switch
         {
             "Home" => "Home", "Discover" => "Discover", "Library" => "Library",

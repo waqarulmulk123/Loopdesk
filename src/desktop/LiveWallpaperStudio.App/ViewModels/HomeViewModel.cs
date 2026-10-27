@@ -24,7 +24,7 @@ public sealed partial class HomeViewModel : ObservableObject
     private string _featuredDescription = "Browse the latest wallpapers available for your desktop.";
 
     [ObservableProperty]
-    private string _featuredPosterUri = string.Empty;
+    private Uri? _featuredPosterUri;
 
     public ObservableCollection<HomeCatalogItem> Items { get; } = new();
 
@@ -47,7 +47,7 @@ public sealed partial class HomeViewModel : ObservableObject
                 FeaturedDescription = string.IsNullOrWhiteSpace(featured.Description)
                     ? "A curated motion wallpaper from the Loopdesk catalog."
                     : featured.Description;
-                FeaturedPosterUri = PosterFor(featured.Id);
+                FeaturedPosterUri = new Uri(PosterFor(featured.Id));
             }
         }
         catch

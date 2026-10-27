@@ -10,13 +10,14 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid>
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
                 <TextBlock Text="EXPLORE" Foreground="{StaticResource PremiumAccentBrush}" FontSize="12" FontWeight="SemiBold" CharacterSpacing="170" />
                 <TextBlock Text="Discover" FontSize="40" FontWeight="SemiBold" />
-                <TextBlock Text="Find beautiful video wallpapers from the online catalog." Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="16" />
+                <TextBlock Text="Find beautiful video wallpapers from the online catalog." Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="16" TextWrapping="Wrap" />
             </StackPanel>
-            <Button Content="↻ Refresh catalog" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button Grid.Column="1" Content="↻ Refresh catalog" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" />
         </Grid>
 
         <StackPanel Grid.Row="1" Spacing="18">
@@ -80,16 +81,19 @@
             </GridView.Footer>
         </GridView>
 
-        <Grid Grid.Row="3" ColumnSpacing="14">
+        <Grid Grid.Row="3" RowSpacing="10">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
             <StackPanel Spacing="3">
                 <TextBlock Text="Selected wallpaper" FontSize="20" FontWeight="SemiBold" />
                 <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+            <ScrollViewer Grid.Row="1" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                 <Button Content="Save favourite" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ToggleFavouriteCommand}" />
                 <Button Content="Download selected" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />
                 <Button Content="Apply selected" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ApplySelectedCommand}" />
             </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

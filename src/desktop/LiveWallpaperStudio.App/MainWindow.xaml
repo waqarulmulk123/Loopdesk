@@ -11,20 +11,22 @@
     <NavigationView x:Name="NavView"
                     Background="{StaticResource ShellBackgroundBrush}"
                     IsBackButtonVisible="Collapsed"
-                    IsPaneToggleButtonVisible="False"
-                    PaneDisplayMode="Left"
+                    IsPaneToggleButtonVisible="True"
+                    PaneDisplayMode="Auto"
+                    IsSettingsVisible="False"
                     CompactPaneLength="64"
-                    OpenPaneLength="196"
+                    OpenPaneLength="252"
                     SelectionChanged="NavView_SelectionChanged"
                     Loaded="NavView_Loaded">
         <NavigationView.Header>
             <Grid Height="64" Padding="28,0,28,0" Background="{StaticResource ShellBackgroundBrush}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <TextBlock Text="Loopdesk" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
                     <TextBlock Text="/" Foreground="#FF50617F" />
                     <TextBlock x:Name="BreadcrumbPage" Text="Home" Foreground="{StaticResource PremiumTextSecondaryBrush}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Border Background="#FF101C36" BorderBrush="#FF2A4169" BorderThickness="1" CornerRadius="16" Padding="14,6">
                         <TextBlock Text="Windows desktop" Foreground="{StaticResource PremiumTextSecondaryBrush}" FontSize="12" />
                     </Border>
