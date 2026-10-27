@@ -6,7 +6,7 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap desktop rescap">
-  <Identity Name="MWaqarUlMulk.Loopdesk" Publisher="CN=0F1F4D61-78EC-457E-A17A-38A9CE6AE7BB" Version="1.0.1.0" />
+  <Identity Name="MWaqarUlMulk.Loopdesk" Publisher="CN=0F1F4D61-78EC-457E-A17A-38A9CE6AE7BB" Version="1.0.2.0" />
   <Properties>
     <DisplayName>Loopdesk</DisplayName>
     <PublisherDisplayName>M Waqar Ul Mulk</PublisherDisplayName>

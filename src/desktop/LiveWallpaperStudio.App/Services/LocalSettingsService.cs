@@ -10,6 +10,7 @@ namespace LiveWallpaperStudio.App.Services;
 /// </summary>
 public sealed class LocalSettingsService
 {
+    private static readonly object FileGate = new();
     public const string ProductionApiBaseUrl = "https://live-wallpaper-studio-api.mwaqardula.workers.dev";
     public bool Muted { get; set; } = true;
     public bool PauseOnFullscreen { get; set; } = true;
@@ -28,6 +29,22 @@ public sealed class LocalSettingsService
 
     public void Save()
     {
+        lock (FileGate) SaveCore();
+    }
+
+    public static void Update(Action<LocalSettingsService> update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        lock (FileGate)
+        {
+            LocalSettingsService settings = LoadCore();
+            update(settings);
+            settings.SaveCore();
+        }
+    }
+
+    private void SaveCore()
+    {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
         string temporaryPath = FilePath + ".tmp";
         File.WriteAllText(temporaryPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
@@ -35,6 +52,11 @@ public sealed class LocalSettingsService
     }
 
     public static LocalSettingsService Load()
+    {
+        lock (FileGate) return LoadCore();
+    }
+
+    private static LocalSettingsService LoadCore()
     {
         try
         {

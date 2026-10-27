@@ -13,9 +13,7 @@ public sealed partial class OnboardingPage : Page
 
     private void StartButton_Click(object sender, RoutedEventArgs e)
     {
-        var settings = LocalSettingsService.Load();
-        settings.HasCompletedOnboarding = true;
-        settings.Save();
+        LocalSettingsService.Update(settings => settings.HasCompletedOnboarding = true);
         Frame.Navigate(typeof(HomePage));
     }
 }

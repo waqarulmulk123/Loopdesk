@@ -196,9 +196,7 @@ public sealed partial class DiscoverViewModel : ObservableObject
             string playbackPath = DownloadedWallpaperService.Instance.CreatePlaybackCopy(wallpaper);
             if (RenderSupervisor.Instance.Start(playbackPath))
             {
-                var settings = LocalSettingsService.Load();
-                settings.AppliedWallpaperId = wallpaper.Id;
-                settings.Save();
+                LocalSettingsService.Update(settings => settings.AppliedWallpaperId = wallpaper.Id);
                 CatalogStatus = $"Applied {SelectedItem.Title}. It will be restored after sign-in and wake.";
             }
             else

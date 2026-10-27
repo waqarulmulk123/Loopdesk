@@ -14,12 +14,14 @@ public sealed class DownloadedWallpaperService
 {
     private static readonly byte[] Entropy = SHA256.HashData("Loopdesk.MediaVault.v1"u8.ToArray());
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    // ponytail: one process-wide vault lock; use a named OS mutex only if a second app instance is supported.
+    private static readonly SemaphoreSlim IndexGate = new(1, 1);
 
     public static DownloadedWallpaperService Instance { get; } = new();
 
     private DownloadedWallpaperService() { }
 
-    private static string Root => Path.Combine(
+    private static string Root => AppContext.GetData("Loopdesk.VaultRoot") as string ?? Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Loopdesk");
     private static string VaultDirectory => Path.Combine(Root, "vault");
     private static string PlaybackDirectory => Path.Combine(Root, "playback");
@@ -27,17 +29,14 @@ public sealed class DownloadedWallpaperService
 
     public IReadOnlyList<DownloadedWallpaper> List()
     {
+        IndexGate.Wait();
         try
         {
-            if (!File.Exists(IndexPath)) return [];
-            return JsonSerializer.Deserialize<List<DownloadedWallpaper>>(File.ReadAllText(IndexPath))
-                ?.Where(item => IsSafeId(item.Id) && File.Exists(GetVaultPath(item.Id)))
-                .OrderByDescending(item => item.DownloadedAt)
-                .ToArray() ?? [];
+            return ListCore();
         }
-        catch (JsonException)
+        finally
         {
-            return [];
+            IndexGate.Release();
         }
     }
 
@@ -46,21 +45,27 @@ public sealed class DownloadedWallpaperService
         if (!File.Exists(verifiedVideoPath)) throw new FileNotFoundException("Verified download was not found.", verifiedVideoPath);
         if (!IsSafeId(id)) throw new InvalidOperationException("The cloud catalog returned an invalid wallpaper identifier.");
 
-        Directory.CreateDirectory(VaultDirectory);
-        Directory.CreateDirectory(Path.GetDirectoryName(IndexPath)!);
         byte[] clear = await File.ReadAllBytesAsync(verifiedVideoPath, cancellationToken);
         byte[] protectedBytes = ProtectedData.Protect(clear, Entropy, DataProtectionScope.CurrentUser);
-        string vaultPath = GetVaultPath(id);
-        string temporaryPath = vaultPath + ".partial";
-        await File.WriteAllBytesAsync(temporaryPath, protectedBytes, cancellationToken);
-        File.Move(temporaryPath, vaultPath, overwrite: true);
-        File.Delete(verifiedVideoPath);
+        await IndexGate.WaitAsync(cancellationToken);
+        try
+        {
+            Directory.CreateDirectory(VaultDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(IndexPath)!);
+            string vaultPath = GetVaultPath(id);
+            string temporaryPath = vaultPath + ".partial";
+            await File.WriteAllBytesAsync(temporaryPath, protectedBytes, cancellationToken);
+            File.Move(temporaryPath, vaultPath, overwrite: true);
+            File.Delete(verifiedVideoPath);
 
-        var items = List().Where(item => !string.Equals(item.Id, id, StringComparison.Ordinal)).ToList();
-        items.Add(new DownloadedWallpaper(id, title, DateTimeOffset.UtcNow));
-        string indexTemporaryPath = IndexPath + ".partial";
-        await File.WriteAllTextAsync(indexTemporaryPath, JsonSerializer.Serialize(items, JsonOptions), cancellationToken);
-        File.Move(indexTemporaryPath, IndexPath, overwrite: true);
+            var items = ListCore().Where(item => !string.Equals(item.Id, id, StringComparison.Ordinal)).ToList();
+            items.Add(new DownloadedWallpaper(id, title, DateTimeOffset.UtcNow));
+            await WriteIndexAsync(items, cancellationToken);
+        }
+        finally
+        {
+            IndexGate.Release();
+        }
     }
 
     public string CreatePlaybackCopy(DownloadedWallpaper wallpaper)
@@ -79,16 +84,21 @@ public sealed class DownloadedWallpaperService
     public void Remove(DownloadedWallpaper wallpaper)
     {
         if (!IsSafeId(wallpaper.Id)) throw new InvalidOperationException("Invalid downloaded wallpaper identifier.");
-        File.Delete(GetVaultPath(wallpaper.Id));
-        var remaining = List().Where(item => !string.Equals(item.Id, wallpaper.Id, StringComparison.Ordinal)).ToList();
-        string temporaryPath = IndexPath + ".partial";
-        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(remaining, JsonOptions));
-        File.Move(temporaryPath, IndexPath, overwrite: true);
-        var settings = LocalSettingsService.Load();
-        if (string.Equals(settings.AppliedWallpaperId, wallpaper.Id, StringComparison.Ordinal))
+        IndexGate.Wait();
+        try
         {
-            settings.AppliedWallpaperId = null;
-            settings.Save();
+            File.Delete(GetVaultPath(wallpaper.Id));
+            var remaining = ListCore().Where(item => !string.Equals(item.Id, wallpaper.Id, StringComparison.Ordinal)).ToList();
+            WriteIndexAsync(remaining, CancellationToken.None).GetAwaiter().GetResult();
+            LocalSettingsService.Update(settings =>
+            {
+                if (string.Equals(settings.AppliedWallpaperId, wallpaper.Id, StringComparison.Ordinal))
+                    settings.AppliedWallpaperId = null;
+            });
+        }
+        finally
+        {
+            IndexGate.Release();
         }
     }
 
@@ -102,6 +112,53 @@ public sealed class DownloadedWallpaperService
     }
 
     private static string GetVaultPath(string id) => Path.Combine(VaultDirectory, id + ".lwp");
+
+    private static IReadOnlyList<DownloadedWallpaper> ListCore()
+    {
+        try
+        {
+            if (!File.Exists(IndexPath)) return RebuildIndexFromVault();
+            return JsonSerializer.Deserialize<List<DownloadedWallpaper>>(File.ReadAllText(IndexPath))
+                ?.Where(item => IsSafeId(item.Id) && File.Exists(GetVaultPath(item.Id)))
+                .OrderByDescending(item => item.DownloadedAt)
+                .ToArray() ?? [];
+        }
+        catch (JsonException)
+        {
+            string backupPath = Path.Combine(Root, $"downloads.{DateTimeOffset.UtcNow:yyyyMMddHHmmssfff}.bad");
+            try { File.Move(IndexPath, backupPath, overwrite: true); } catch (IOException) { }
+            IReadOnlyList<DownloadedWallpaper> rebuilt = RebuildIndexFromVault();
+            WriteIndex(rebuilt);
+            return rebuilt;
+        }
+    }
+
+    private static IReadOnlyList<DownloadedWallpaper> RebuildIndexFromVault()
+    {
+        if (!Directory.Exists(VaultDirectory)) return [];
+        return Directory.EnumerateFiles(VaultDirectory, "*.lwp", SearchOption.TopDirectoryOnly)
+            .Select(path => new FileInfo(path))
+            .Where(file => file.Length > 0 && IsSafeId(Path.GetFileNameWithoutExtension(file.Name)))
+            .Select(file => new DownloadedWallpaper(Path.GetFileNameWithoutExtension(file.Name), "Recovered wallpaper", file.LastWriteTimeUtc))
+            .OrderByDescending(item => item.DownloadedAt)
+            .ToArray();
+    }
+
+    private static void WriteIndex(IEnumerable<DownloadedWallpaper> items)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(IndexPath)!);
+        string temporaryPath = IndexPath + ".partial";
+        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(items, JsonOptions));
+        File.Move(temporaryPath, IndexPath, overwrite: true);
+    }
+
+    private static async Task WriteIndexAsync(IEnumerable<DownloadedWallpaper> items, CancellationToken cancellationToken)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(IndexPath)!);
+        string temporaryPath = IndexPath + ".partial";
+        await File.WriteAllTextAsync(temporaryPath, JsonSerializer.Serialize(items, JsonOptions), cancellationToken);
+        File.Move(temporaryPath, IndexPath, overwrite: true);
+    }
 
     private static bool IsSafeId(string id) => !string.IsNullOrWhiteSpace(id) &&
         id.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_');

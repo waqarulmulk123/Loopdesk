@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace LiveWallpaperStudio.App.Services;
 
@@ -16,12 +17,23 @@ public sealed class RenderSupervisor
     private const int MaximumUnexpectedExits = 3;
     private readonly object _gate = new();
     private Process? _process;
+    private IntPtr _job;
     private int _unexpectedExits;
     private bool _stopping;
     private int _generation;
     private string? _activeVideoPath;
 
     public string? LastError { get; private set; }
+
+    private RenderSupervisor()
+    {
+        _job = CreateJobObject(IntPtr.Zero, null);
+        if (_job != IntPtr.Zero && !ConfigureKillOnClose(_job))
+        {
+            CloseHandle(_job);
+            _job = IntPtr.Zero;
+        }
+    }
 
     public bool IsRunning
     {
@@ -80,6 +92,15 @@ public sealed class RenderSupervisor
         if (_process is null)
         {
             LastError = "Windows did not start the renderer process.";
+            return false;
+        }
+
+        if (_job != IntPtr.Zero && !AssignProcessToJobObject(_job, _process.Handle))
+        {
+            LastError = $"Windows could not supervise the renderer (error {Marshal.GetLastWin32Error()}).";
+            _process.Kill(entireProcessTree: true);
+            _process.Dispose();
+            _process = null;
             return false;
         }
 
@@ -148,6 +169,20 @@ public sealed class RenderSupervisor
         }
     }
 
+    public void Shutdown()
+    {
+        lock (_gate)
+        {
+            _generation++;
+            StopCore(cleanupPlaybackCopies: true);
+            if (_job != IntPtr.Zero)
+            {
+                CloseHandle(_job);
+                _job = IntPtr.Zero;
+            }
+        }
+    }
+
     private void StopCore(bool cleanupPlaybackCopies)
     {
         _stopping = true;
@@ -171,4 +206,74 @@ public sealed class RenderSupervisor
     }
 
     public bool ShouldRestartAfterUnexpectedExit() => _unexpectedExits < MaximumUnexpectedExits;
+
+    private static bool ConfigureKillOnClose(IntPtr job)
+    {
+        var limits = new JobObjectExtendedLimitInformation
+        {
+            BasicLimitInformation = new JobObjectBasicLimitInformation
+            {
+                LimitFlags = JobObjectLimitKillOnJobClose,
+            },
+        };
+        IntPtr memory = Marshal.AllocHGlobal(Marshal.SizeOf<JobObjectExtendedLimitInformation>());
+        try
+        {
+            Marshal.StructureToPtr(limits, memory, false);
+            return SetInformationJobObject(job, JobObjectExtendedLimitInformationClass, memory,
+                (uint)Marshal.SizeOf<JobObjectExtendedLimitInformation>());
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(memory);
+        }
+    }
+
+    private const uint JobObjectLimitKillOnJobClose = 0x00002000;
+    private const int JobObjectExtendedLimitInformationClass = 9;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct IoCounters
+    {
+        public ulong ReadOperationCount;
+        public ulong WriteOperationCount;
+        public ulong OtherOperationCount;
+        public ulong ReadTransferCount;
+        public ulong WriteTransferCount;
+        public ulong OtherTransferCount;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct JobObjectBasicLimitInformation
+    {
+        public long PerProcessUserTimeLimit;
+        public long PerJobUserTimeLimit;
+        public uint LimitFlags;
+        public UIntPtr MinimumWorkingSetSize;
+        public UIntPtr MaximumWorkingSetSize;
+        public uint ActiveProcessLimit;
+        public IntPtr Affinity;
+        public uint PriorityClass;
+        public uint SchedulingClass;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct JobObjectExtendedLimitInformation
+    {
+        public JobObjectBasicLimitInformation BasicLimitInformation;
+        public IoCounters IoInfo;
+        public UIntPtr ProcessMemoryLimit;
+        public UIntPtr JobMemoryLimit;
+        public UIntPtr PeakProcessMemoryUsed;
+        public UIntPtr PeakJobMemoryUsed;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern IntPtr CreateJobObject(IntPtr jobAttributes, string? name);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetInformationJobObject(IntPtr job, int informationClass, IntPtr information, uint informationLength);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool CloseHandle(IntPtr handle);
 }

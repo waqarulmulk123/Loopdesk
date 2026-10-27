@@ -9,7 +9,7 @@ This document describes the shipped cloud-only desktop flow.
 - Discover — production Cloudflare catalog, search, favourite and download.
 - Downloads — protected download records, refresh.
 - Displays — Win32 monitor count + primary size, refresh.
-- Settings — local preferences; runtime renderer policy integration is not implemented.
+- Settings — local preferences plus opt-in Windows startup.
 - Diagnostics — app version, OS version, renderer status, storage posture and catalog status.
 - About — product, stack, offline-first note, version.
 
@@ -42,17 +42,17 @@ This document describes the shipped cloud-only desktop flow.
 
 ## Settings
 
-- Preferences are stored locally as JSON in LocalAppData. Runtime pause/mute integration is not implemented yet.
+- Preferences are stored locally as JSON in LocalAppData. Options which are not connected to the native renderer are not presented as active runtime controls.
 
 ## Tray
 
-- A tray/background wallpaper lifecycle is not implemented. Closing Loopdesk stops the renderer.
+- Closing the window hides Loopdesk to the system tray and keeps the wallpaper playing. Only the explicit Exit command stops the renderer.
 
 ## Diagnostics / safety
 
-- Renderer supervisor stops the native renderer when Loopdesk exits; it is never elevated and never a Windows Service.
+- A single-instance guard and Windows Job Object prevent duplicate or orphan renderer processes. The renderer stops only on explicit Exit; it is never elevated and never a Windows Service.
 - Named-pipe IPC v1 supports status, pause, resume and shutdown; policy/event integration is not implemented.
 
 ## Still P1 (not in this build)
 
-- Multi-monitor assignment, persistence after app exit, power/session pause policy, WebView2 interactive wallpapers, playlists, premium sync, account favourites, and signed direct installation.
+- Multi-monitor assignment, lock/display-off/battery pause policy, WebView2 interactive wallpapers, playlists, premium sync, account favourites, and signed direct installation.

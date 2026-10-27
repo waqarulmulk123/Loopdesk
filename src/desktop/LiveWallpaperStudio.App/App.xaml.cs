@@ -4,6 +4,7 @@ namespace LiveWallpaperStudio.App;
 
 public partial class App : Application
 {
+    private Mutex? _singleInstance;
     private Window? _window;
     private Services.TrayService? _tray;
     private bool _exiting;
@@ -27,6 +28,18 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // Do not wait for the existing instance: a second launch must exit,
+        // not hang until the first Loopdesk process closes.
+        _singleInstance = new Mutex(initiallyOwned: false, "Local\\Loopdesk.Desktop", out bool isFirstInstance);
+        if (!isFirstInstance)
+        {
+            _singleInstance.Dispose();
+            _singleInstance = null;
+            Exit();
+            return;
+        }
+        _singleInstance.WaitOne();
+
         Services.DownloadedWallpaperService.Instance.CleanupPlaybackCopies();
         _window = new MainWindow();
         _tray = new Services.TrayService(WinRT.Interop.WindowNative.GetWindowHandle(_window),
@@ -45,7 +58,9 @@ public partial class App : Application
         _window.Closed += (_, _) =>
         {
             _tray.Dispose();
-            Services.RenderSupervisor.Instance.Stop();
+            Services.RenderSupervisor.Instance.Shutdown();
+            _singleInstance?.Dispose();
+            _singleInstance = null;
         };
         _window.Activate();
         _ = RestoreLastWallpaperAsync();
@@ -54,12 +69,7 @@ public partial class App : Application
     private void StopAndForgetWallpaper()
     {
         Services.RenderSupervisor.Instance.Stop();
-        var settings = Services.LocalSettingsService.Load();
-        if (settings.AppliedWallpaperId is not null)
-        {
-            settings.AppliedWallpaperId = null;
-            settings.Save();
-        }
+        Services.LocalSettingsService.Update(settings => settings.AppliedWallpaperId = null);
     }
 
     private async Task RestoreLastWallpaperAsync(bool waitForDesktop = false)
@@ -75,8 +85,7 @@ public partial class App : Application
                 .FirstOrDefault(item => item.Id == settings.AppliedWallpaperId);
             if (wallpaper is null)
             {
-                settings.AppliedWallpaperId = null;
-                settings.Save();
+                Services.LocalSettingsService.Update(latest => latest.AppliedWallpaperId = null);
                 return;
             }
 
@@ -89,8 +98,7 @@ public partial class App : Application
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
-                    settings.AppliedWallpaperId = null;
-                    settings.Save();
+                    Services.LocalSettingsService.Update(latest => latest.AppliedWallpaperId = null);
                     return;
                 }
                 catch (IOException) { }

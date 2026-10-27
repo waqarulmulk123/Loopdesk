@@ -5,9 +5,9 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>LiveWallpaperStudio.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.0.1.0</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.2.0</Version>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <SelfContained>true</SelfContained>
@@ -30,9 +30,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="..\..\..\packaging\msix\Assets\StoreLogo.png" Link="Assets\StoreLogo.png" />
-    <Content Include="..\..\..\packaging\msix\Assets\Square150x150Logo.png" Link="Assets\Square150x150Logo.png" />
-    <Content Include="..\..\..\packaging\msix\Assets\Square44x44Logo.png" Link="Assets\Square44x44Logo.png" />
+    <Content Include="..\..\..\packaging\msix\Assets\StoreLogo.png" Link="Assets\StoreLogo.png">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\..\packaging\msix\Assets\Square150x150Logo.png" Link="Assets\Square150x150Logo.png">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\..\packaging\msix\Assets\Square44x44Logo.png" Link="Assets\Square44x44Logo.png">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Include="..\..\..\build\renderer\Release\lws-renderer.exe" Link="lws-renderer.exe" Condition="Exists('..\..\..\build\renderer\Release\lws-renderer.exe')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

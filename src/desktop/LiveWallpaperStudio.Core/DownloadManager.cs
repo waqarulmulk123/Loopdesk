@@ -11,6 +11,7 @@ namespace LiveWallpaperStudio.Core;
 /// </summary>
 public sealed class DownloadManager
 {
+    private static readonly TimeSpan ReadStallTimeout = TimeSpan.FromSeconds(30);
     private readonly HttpClient _http;
 
     public DownloadManager(HttpClient? http = null)
@@ -70,6 +71,11 @@ public sealed class DownloadManager
                     existing = 0;
                     continue;
                 }
+                if ((int)response.StatusCode is >= 400 and < 500 &&
+                    response.StatusCode is not System.Net.HttpStatusCode.RequestTimeout and not System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    return new DownloadResult(false, $"Download rejected by server ({(int)response.StatusCode}).");
+                }
                 bool resumed = response.StatusCode == System.Net.HttpStatusCode.PartialContent;
                 if (resumed && response.Content.Headers.ContentRange?.From != existing)
                 {
@@ -92,9 +98,20 @@ public sealed class DownloadManager
                         FileAccess.Write, FileShare.None, 8192, useAsync: true);
                     byte[] buffer = new byte[8192];
                     long done = existing;
-                    int read;
-                    while ((read = await content.ReadAsync(buffer, ct)) > 0)
+                    while (true)
                     {
+                        using var readTimeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                        readTimeout.CancelAfter(ReadStallTimeout);
+                        int read;
+                        try
+                        {
+                            read = await content.ReadAsync(buffer, readTimeout.Token);
+                        }
+                        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+                        {
+                            throw new IOException("Download stalled while waiting for data.");
+                        }
+                        if (read == 0) break;
                         await file.WriteAsync(buffer.AsMemory(0, read), ct);
                         done += read;
                         progress?.Report((done, response.Content.Headers.ContentLength.HasValue

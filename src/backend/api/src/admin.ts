@@ -21,7 +21,9 @@ type WallpaperUpdateRequest = {
   featured?: unknown;
   thumbnailKey?: unknown;
 };
-const maxUploadBytes = 100 * 1024 * 1024;
+// Direct uploads are buffered for MP4 signature and SHA-256 validation.
+// Keep the limit safely below a Worker memory ceiling until uploads stream to R2.
+const maxUploadBytes = 40 * 1024 * 1024;
 const maxThumbnailBytes = 2 * 1024 * 1024;
 
 function positiveInteger(value: unknown, maximum: number): number | null {
@@ -124,6 +126,7 @@ export function adminRoutes(): Hono<{ Bindings: AdminBindings }> {
     if (job.state !== 'awaiting_upload') return c.json({ error: { code: 'invalid_state', message: 'Upload content was already received.' } }, 409);
     const variant = await db.prepare('SELECT id, object_key, size_bytes, sha256 FROM media_variants WHERE wallpaper_id = ?').bind(job.wallpaper_id).first<{ id: string; object_key: string; size_bytes: number; sha256: string }>();
     if (!variant) return c.json({ error: { code: 'invalid_state', message: 'Upload variant not found.' } }, 409);
+    if (variant.size_bytes > maxUploadBytes) return c.json({ error: { code: 'payload_too_large', message: 'Direct MP4 uploads are limited to 40 MiB.' } }, 413);
     const declaredLength = c.req.header('content-length');
     if (!declaredLength || !/^\d+$/.test(declaredLength) || Number(declaredLength) !== variant.size_bytes) return c.json({ error: { code: 'invalid_request', message: 'content-length must match the initialized sizeBytes.' } }, 400);
     const bytes = new Uint8Array(await c.req.raw.arrayBuffer());

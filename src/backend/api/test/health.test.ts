@@ -241,6 +241,22 @@ test('admin initialization gives each uploaded variant a unique key', async () =
   assert.notEqual(variants[0][2], variants[1][2]);
 });
 
+test('admin initialization rejects MP4 uploads larger than the direct-upload limit', async () => {
+  const db = {
+    prepare() { return { bind() { return this; } }; },
+    async batch() { throw new Error('oversized upload must not create database rows'); },
+  } as unknown as D1Database;
+  const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', {
+    method: 'POST',
+    headers: { authorization: 'Bearer test-token', 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Oversized video', contentType: 'video/mp4', width: 1920, height: 1080, fps: 30,
+      sizeBytes: 40 * 1024 * 1024 + 1, sha256: 'a'.repeat(64),
+    }),
+  }), { DB: db, R2_PUBLISHED: {} as R2Bucket, ADMIN_API_TOKEN: 'test-token' });
+  assert.equal(response.status, 400);
+});
+
 test('admin routes are mounted and reject requests without a configured token', async () => {
   const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', { method: 'POST' }), { DB: {} as D1Database });
   assert.equal(response.status, 503);

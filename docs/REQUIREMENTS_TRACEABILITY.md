@@ -15,7 +15,7 @@ Status definitions: **implemented** is present in source and covered by the stat
 | Per-display assignment / multi-monitor playback | not implemented | Displays page reports Win32 monitor count and primary resolution only. |
 | Pause policy, mute, fit mode, frame cap | not implemented | Preferences persist locally but are not pushed into renderer behavior. |
 | Renderer WorkerW attachment | partially verified | One Windows 10 single-monitor proof is recorded. Validate Explorer interaction, restart, device loss, and Windows 11 releases manually. |
-| Tray/background lifetime / restore after restart | not implemented | `TrayService` is not instantiated and closing the app stops the renderer. |
+| Tray/background lifetime / restore after restart | implemented | `TrayService` is instantiated, closing hides to tray, last applied protected download is restored at launch, and an explicit Exit stops playback. Verify on physical Windows. |
 | MSIX packaging | implemented | Packaging scripts and MSIX build exist. Signing and clean-machine install/uninstall remain manual release gates. |
 | Premium identity, payments, entitlement | not implemented | Premium download remains refused until the owner selects an identity/entitlement provider. |
 | Cloudflare API / catalog | verified | Worker, D1, R2 and production range download were previously verified; run backend verify before backend changes. |

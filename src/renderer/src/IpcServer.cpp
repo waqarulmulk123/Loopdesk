@@ -1,6 +1,7 @@
 #include "lws/IpcServer.h"
 
 #include <cctype>
+#include <array>
 #include <iomanip>
 #include <iostream>
 #include <sddl.h>
@@ -90,12 +91,33 @@ void IpcServer::Run(Handler handler) {
     securityAttributes.lpSecurityDescriptor = securityDescriptor;
     while (stopEvent_ && WaitForSingleObject(stopEvent_, 0) != WAIT_OBJECT_0) {
         HANDLE pipe = CreateNamedPipeW(
-            kPipeName, PIPE_ACCESS_DUPLEX,
+            kPipeName, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
             1, 1024 * 1024, 1024 * 1024, 0, &securityAttributes);
         if (pipe == INVALID_HANDLE_VALUE) break;
-        BOOL connected = ConnectNamedPipe(pipe, nullptr) ||
-                         GetLastError() == ERROR_PIPE_CONNECTED;
+        OVERLAPPED connect{};
+        connect.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        if (!connect.hEvent) {
+            CloseHandle(pipe);
+            continue;
+        }
+        BOOL connected = ConnectNamedPipe(pipe, &connect);
+        DWORD connectError = connected ? ERROR_SUCCESS : GetLastError();
+        if (!connected && connectError == ERROR_IO_PENDING) {
+            const std::array<HANDLE, 2> waits{stopEvent_, connect.hEvent};
+            DWORD result = WaitForMultipleObjects(static_cast<DWORD>(waits.size()), waits.data(), FALSE, INFINITE);
+            if (result == WAIT_OBJECT_0) {
+                CancelIoEx(pipe, &connect);
+                CloseHandle(connect.hEvent);
+                CloseHandle(pipe);
+                break;
+            }
+            DWORD ignored = 0;
+            connected = result == WAIT_OBJECT_0 + 1 && GetOverlappedResult(pipe, &connect, &ignored, FALSE);
+        } else if (!connected && connectError == ERROR_PIPE_CONNECTED) {
+            connected = TRUE;
+        }
+        CloseHandle(connect.hEvent);
         if (!connected) {
             CloseHandle(pipe);
             continue;
@@ -105,7 +127,17 @@ void IpcServer::Run(Handler handler) {
         // the heap so starting IPC cannot overflow the renderer thread.
         std::vector<char> buffer(1024 * 1024);
         DWORD read = 0;
-        if (ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size() - 1), &read, nullptr) && read > 0) {
+        OVERLAPPED requestRead{};
+        requestRead.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        BOOL received = requestRead.hEvent && ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size() - 1), &read, &requestRead);
+        if (!received && requestRead.hEvent && GetLastError() == ERROR_IO_PENDING) {
+            const std::array<HANDLE, 2> waits{stopEvent_, requestRead.hEvent};
+            DWORD result = WaitForMultipleObjects(static_cast<DWORD>(waits.size()), waits.data(), FALSE, 30'000);
+            if (result != WAIT_OBJECT_0 + 1) CancelIoEx(pipe, &requestRead);
+            received = result == WAIT_OBJECT_0 + 1 && GetOverlappedResult(pipe, &requestRead, &read, FALSE);
+        }
+        if (requestRead.hEvent) CloseHandle(requestRead.hEvent);
+        if (received && read > 0) {
             std::string request(buffer.data(), read);
             std::string method;
             TryExtractJsonString(request, "method", &method);
@@ -113,11 +145,9 @@ void IpcServer::Run(Handler handler) {
             DWORD written = 0;
             if (!WriteFile(pipe, response.data(), static_cast<DWORD>(response.size()), &written, nullptr)) {
                 std::cerr << "IPC response write failed: " << GetLastError() << "\n";
-            } else if (!FlushFileBuffers(pipe)) {
-                std::cerr << "IPC response flush failed: " << GetLastError() << "\n";
             }
         } else {
-            std::cerr << "IPC request read failed: " << GetLastError() << "\n";
+            std::cerr << "IPC request read timed out or failed.\n";
         }
         DisconnectNamedPipe(pipe);
         CloseHandle(pipe);

@@ -68,14 +68,14 @@ public sealed partial class LibraryViewModel : ObservableObject
     [RelayCommand]
     private void ApplySelected()
     {
+        DownloadedWallpaper? selected = SelectedMedia;
+        if (selected is null) return;
         string? playbackPath = PreparePreview();
         if (playbackPath is null) return;
         if (RenderSupervisor.Instance.Start(playbackPath))
         {
-            var settings = LocalSettingsService.Load();
-            settings.AppliedWallpaperId = SelectedMedia!.Id;
-            settings.Save();
-            Status = $"Applied {SelectedMedia.Title}. It will be restored after sign-in and wake.";
+            LocalSettingsService.Update(settings => settings.AppliedWallpaperId = selected.Id);
+            Status = $"Applied {selected.Title}. It will be restored after sign-in and wake.";
         }
         else
         {
@@ -87,9 +87,7 @@ public sealed partial class LibraryViewModel : ObservableObject
     private void StopWallpaper()
     {
         RenderSupervisor.Instance.Stop();
-        var settings = LocalSettingsService.Load();
-        settings.AppliedWallpaperId = null;
-        settings.Save();
+        LocalSettingsService.Update(settings => settings.AppliedWallpaperId = null);
         Status = "Wallpaper stopped.";
     }
 

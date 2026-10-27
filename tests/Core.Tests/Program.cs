@@ -74,6 +74,12 @@ try
     var rejected = await manager.DownloadAsync("https://example.invalid/video.mp4", tempFile, finalFile,
         new string('0', 64), downloaded.Length);
     Check(!rejected.Success && !File.Exists(tempFile), "checksum mismatch removes the rejected partial file");
+
+    var forbiddenHttpHandler = new CountingStatusHandler(System.Net.HttpStatusCode.Forbidden);
+    using var forbiddenHttp = new HttpClient(forbiddenHttpHandler);
+    var forbidden = await new DownloadManager(forbiddenHttp).DownloadAsync("https://example.invalid/video.mp4", tempFile, finalFile, null, null);
+    Check(!forbidden.Success && forbidden.FailureReason == "Download rejected by server (403)." && forbiddenHttpHandler.Calls == 1,
+        "download does not retry permanent 4xx responses");
 }
 finally
 {
@@ -101,4 +107,15 @@ sealed class StaticResponseHandler(byte[] content) : HttpMessageHandler
         {
             Content = new ByteArrayContent(content),
         });
+}
+
+sealed class CountingStatusHandler(System.Net.HttpStatusCode status) : HttpMessageHandler
+{
+    public int Calls { get; private set; }
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        Calls++;
+        return Task.FromResult(new HttpResponseMessage(status));
+    }
 }
