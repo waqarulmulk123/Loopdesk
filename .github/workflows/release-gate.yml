@@ -1,0 +1,32 @@
+name: Release gate
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    name: Validate release-control files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require release-control documents
+        run: |
+          test -f NOTICE.md
+          test -f docs/RELEASE_GATES.md
+          test -f docs/RELEASE_CHECKLIST.md
+
+      - name: Refuse tagged releases with tracked source MP4s
+        run: |
+          tracked_media="$(git ls-files -- 'assets/wallpapers/**/*.mp4')"
+          if [ -n "$tracked_media" ]; then
+            echo "Tracked MP4 source media is still present. See docs/RELEASE_GATES.md."
+            printf '%s\n' "$tracked_media"
+            exit 1
+          fi
+# End of release gate.

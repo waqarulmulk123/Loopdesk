@@ -3,6 +3,10 @@
 Do NOT describe this product as fully working until every item below
 is actually true on real Windows hardware. GitHub Actions verifies the desktop build and renderer startup, but it does not replace the physical checks below.
 
+The release owner must also complete [RELEASE_GATES.md](RELEASE_GATES.md).
+That document records the distinct legal, history-rewrite, signing, Store, and
+physical-hardware actions that neither CI nor an agent can safely perform.
+
 - [ ] Native WinUI app compiles and launches on actual target Windows
 - [ ] Native renderer compiles for x64 and actually plays moving video behind icons
 - [ ] Wallpaper window does not steal focus, block icons, or obscure the desktop in tested configurations
@@ -17,7 +21,7 @@ is actually true on real Windows hardware. GitHub Actions verifies the desktop b
 - [ ] Required unit, integration and shell acceptance tests pass, results archived with dates/build numbers
 - [ ] App and renderer do not require elevated privileges during normal playback
 - [ ] Installer and clean uninstall validated on at least one fresh test machine
-- [ ] Security/third-party licence documentation, README and operational guides included
+- [ ] Security/third-party licence documentation, README and operational guides included; [NOTICE](../NOTICE.md) reviewed against the exact shipped package
 - [ ] No hardcoded production secrets, fabricated claims, fake settings actions or non-working placeholder buttons
 - [ ] Windows versions/GPU codecs tested are listed accurately; unsupported legacy OSs are not advertised
 - [ ] P1 features not implemented are documented as not-yet-implemented, not shown as enabled menu items
