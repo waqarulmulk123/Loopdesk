@@ -12,6 +12,8 @@ namespace LiveWallpaperStudio.App.Services;
 /// </summary>
 public static class IpcClient
 {
+    private const int MaxMessageBytes = 1024 * 1024;
+
     public static async Task<string?> SendAsync(string method, string requestId, CancellationToken ct = default)
     {
         await using var client = new NamedPipeClientStream(
@@ -30,8 +32,23 @@ public static class IpcClient
         await client.WriteAsync(bytes, ct);
         await client.FlushAsync(ct);
 
-        byte[] buffer = new byte[1024 * 1024];
-        int read = await client.ReadAsync(buffer, ct);
-        return read > 0 ? Encoding.UTF8.GetString(buffer, 0, read) : null;
+        byte[] buffer = new byte[8192];
+        using var response = new MemoryStream();
+        do
+        {
+            int read = await client.ReadAsync(buffer, ct);
+            if (read == 0)
+            {
+                return null;
+            }
+            if (response.Length + read > MaxMessageBytes)
+            {
+                throw new InvalidDataException("Renderer response exceeds the IPC message limit.");
+            }
+            response.Write(buffer, 0, read);
+        }
+        while (!client.IsMessageComplete);
+
+        return Encoding.UTF8.GetString(response.GetBuffer(), 0, (int)response.Length);
     }
 }

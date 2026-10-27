@@ -29,7 +29,10 @@
 // flags; the render loop owns the player and the window.
 namespace {
 std::atomic<lws::VideoPlayer*> g_player{nullptr};
-std::atomic<bool> g_paused{false};
+// The IPC thread only changes intent. Media Foundation calls stay on the
+// render thread, which owns the player and its COM objects.
+std::atomic<bool> g_manualPaused{false};
+std::atomic<bool> g_effectivePaused{false};
 std::atomic<bool> g_shutdownRequested{false};
 
 std::string IpcHandler(const std::string& method, const std::string& request) {
@@ -37,7 +40,7 @@ std::string IpcHandler(const std::string& method, const std::string& request) {
     lws::TryExtractJsonString(request, "requestId", &requestId);
     requestId = lws::EscapeJsonString(requestId);
     std::string state = "Playing";
-    if (g_paused.load()) state = "Paused";
+    if (g_effectivePaused.load()) state = "Paused";
     if (method == "engine.hello") {
         return "{\"protocolVersion\":1,\"requestId\":\"" + requestId +
                "\",\"kind\":\"response\",\"success\":true,\"payload\":{\"state\":\"Ready\",\"capabilities\":[\"video\"]},\"error\":null}";
@@ -50,13 +53,11 @@ std::string IpcHandler(const std::string& method, const std::string& request) {
                "\",\"frames\":" + std::to_string(frames) + "},\"error\":null}";
     }
     if (method == "playback.pause") {
-        g_paused.store(true);
-        if (auto* player = g_player.load()) player->Pause();
+        g_manualPaused.store(true);
         return "{\"protocolVersion\":1,\"requestId\":\"" + requestId + "\",\"kind\":\"response\",\"success\":true,\"payload\":{\"state\":\"Paused\"},\"error\":null}";
     }
     if (method == "playback.resume") {
-        g_paused.store(false);
-        if (auto* player = g_player.load()) player->Play();
+        g_manualPaused.store(false);
         return "{\"protocolVersion\":1,\"requestId\":\"" + requestId + "\",\"kind\":\"response\",\"success\":true,\"payload\":{\"state\":\"Playing\"},\"error\":null}";
     }
     if (method == "engine.shutdown") {
@@ -135,7 +136,10 @@ int RunVideo(const std::wstring& videoPath) {
     lws::PlaybackPolicy policy(lws::PausePolicy{});
     MSG msg{};
     bool running = true;
-    DWORD lastReattachAttempt = 0;
+    int exitCode = 0;
+    int reattachFailures = 0;
+    DWORD nextReattachAttempt = 0;
+    bool reattachScheduled = false;
     while (running && !g_shutdownRequested.load()) {
         while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) running = false;
@@ -143,19 +147,49 @@ int RunVideo(const std::wstring& videoPath) {
             DispatchMessageW(&msg);
         }
         if (!running) break;
-        if (device.IsLost() || player->HasError()) break;
+        if (device.IsLost() || player->HasError()) {
+            std::cerr << "Renderer device or media engine failed.\n";
+            exitCode = 3;
+            break;
+        }
         if (!IsWindow(window.Handle())) {
             const DWORD now = GetTickCount();
-            if (now - lastReattachAttempt >= 1000) {
-                lastReattachAttempt = now;
+            if (!reattachScheduled || static_cast<LONG>(now - nextReattachAttempt) >= 0) {
                 presenter.Destroy();
+                adapter.Detach(window.Handle());
                 window.Destroy();
-                createAttachedWindow();
+                if (createAttachedWindow()) {
+                    reattachFailures = 0;
+                    reattachScheduled = false;
+                } else {
+                    ++reattachFailures;
+                    if (reattachFailures == 6) {
+                        std::cerr << "Renderer could not reattach after Explorer restarted.\n";
+                        exitCode = 3;
+                        break;
+                    }
+                    const int shift = (reattachFailures - 1 < 3) ? reattachFailures - 1 : 3;
+                    const DWORD delay = 1000u << shift;
+                    nextReattachAttempt = now + delay;
+                    reattachScheduled = true;
+                    std::cerr << "Wallpaper host unavailable; retrying in " << delay << " ms.\n";
+                }
             }
             Sleep(16);
             continue;
         }
-        if (!g_paused.load() && !policy.ShouldPause(window.Monitor(), false, false, false, false)) {
+        // SM_REMOTESESSION is the Windows signal for the active session being
+        // remote. Lock, display-off and battery-saver need separate system
+        // notifications and deliberately remain unsupported rather than being
+        // guessed from an unrelated signal.
+        const bool policyPaused = policy.ShouldPause(
+            window.Monitor(), false, false, false, GetSystemMetrics(SM_REMOTESESSION) != 0);
+        const bool shouldPause = g_manualPaused.load() || policyPaused;
+        if (g_effectivePaused.exchange(shouldPause) != shouldPause) {
+            if (shouldPause) player->Pause();
+            else player->Play();
+        }
+        if (!shouldPause) {
             if (player->Tick(presenter.BackBuffer())) {
                 presenter.Present();
             }
@@ -172,7 +206,7 @@ int RunVideo(const std::wstring& videoPath) {
     adapter.Detach(window.Handle());
     window.Destroy();
     if (comInitialized) CoUninitialize();
-    return 0;
+    return exitCode;
 }
 
 int main(int argc, char** argv) {
