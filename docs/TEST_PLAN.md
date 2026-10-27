@@ -35,10 +35,12 @@ configuration (single/dual, mixed DPI, portrait/landscape), codec
 
 ## Reproducible physical attachment proof
 
-On a Windows desktop, run:
+On a Windows desktop, first download any owned test wallpaper with Loopdesk.
+Then use its local cache file as the test input (do not use a repository media
+file):
 
 ```powershell
-.\scripts\test-renderer-desktop-attachment.ps1 -VideoPath .\assets\wallpapers\loopdesk\loopdesk_aurora_dreamscape.mp4
+.\scripts\test-renderer-desktop-attachment.ps1 -VideoPath "$env:LOCALAPPDATA\Loopdesk\media\<asset>.mp4"
 ```
 
 Add `-RestartExplorer` to perform the structural Explorer-restart check. It

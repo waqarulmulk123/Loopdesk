@@ -12,3 +12,6 @@ worker-configuration.d.ts
 node_modules/
 dist/
 artifacts/
+
+# Wallpaper source media belongs in private object storage, never in Git.
+*.mp4

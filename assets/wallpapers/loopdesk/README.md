@@ -1,9 +1,9 @@
 # Loopdesk Originals
 
-These five MP4 wallpapers are owned Loopdesk assets supplied for this repository.
-They are published as free, non-premium catalog entries and are bundled with the
-desktop application's offline catalog.
+Loopdesk wallpaper media is deliberately not stored in this repository. The
+desktop app obtains its catalog from the authenticated Cloudflare API, then
+downloads selected assets into the user's local encrypted vault.
 
-Each file is H.264/MP4, 1920x1080, 30 FPS, ten seconds, and has no audio. The
-catalog manifest records the byte size and SHA-256 value used by the desktop
-downloader and the Cloudflare catalog publication.
+Publish only owned, rights-reviewed H.264/MP4 assets to the private publishing
+bucket through the backend administration workflow. Keep the source media in a
+private archive; never add it to Git.
