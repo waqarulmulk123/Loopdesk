@@ -20,6 +20,7 @@ public sealed class LocalSettingsService
     public bool SendCrashReports { get; set; } = false;
     public bool HasCompletedOnboarding { get; set; } = false;
     public bool LowPowerMode { get; set; } = false;
+    public string? AppliedWallpaperId { get; set; }
 
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

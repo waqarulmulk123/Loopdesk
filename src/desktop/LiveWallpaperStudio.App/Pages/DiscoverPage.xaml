@@ -29,10 +29,12 @@
                 <TextBox Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" PlaceholderText="Search titles and themes" VerticalContentAlignment="Center" />
                 <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
             </Grid>
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <Button Content="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" />
-                <Button Content="Loopdesk Originals" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Loopdesk Originals" />
-            </StackPanel>
+            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button Content="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" />
+                    <Button Content="Loopdesk Originals" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Loopdesk Originals" />
+                </StackPanel>
+            </ScrollViewer>
         </StackPanel>
 
         <GridView Grid.Row="2"
@@ -44,12 +46,12 @@
                   ShowsScrollingPlaceholders="True">
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ItemsWrapGrid ItemWidth="300" ItemHeight="282" />
+                    <ItemsWrapGrid ItemWidth="416" ItemHeight="298" />
                 </ItemsPanelTemplate>
             </GridView.ItemsPanel>
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <Border Width="284" Height="266" Background="{StaticResource PremiumCardBrush}" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14">
+                    <Border Width="408" Height="282" Background="{StaticResource PremiumCardBrush}" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14">
                         <Grid RowSpacing="0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="166" />
@@ -81,13 +83,13 @@
             </GridView.Footer>
         </GridView>
 
-        <Grid Grid.Row="3" RowSpacing="10">
-            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <Grid Grid.Row="3" ColumnSpacing="18">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <StackPanel Spacing="3">
                 <TextBlock Text="Selected wallpaper" FontSize="20" FontWeight="SemiBold" />
                 <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
             </StackPanel>
-            <ScrollViewer Grid.Row="1" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Column="1" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                 <Button Content="Save favourite" Style="{StaticResource HomeSecondaryButtonStyle}" Command="{x:Bind ViewModel.ToggleFavouriteCommand}" />
                 <Button Content="Download selected" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.DownloadSelectedCommand}" />

@@ -70,15 +70,26 @@ public sealed partial class LibraryViewModel : ObservableObject
     {
         string? playbackPath = PreparePreview();
         if (playbackPath is null) return;
-        Status = RenderSupervisor.Instance.Start(playbackPath)
-            ? $"Applied {SelectedMedia!.Title}."
-            : $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
+        if (RenderSupervisor.Instance.Start(playbackPath))
+        {
+            var settings = LocalSettingsService.Load();
+            settings.AppliedWallpaperId = SelectedMedia!.Id;
+            settings.Save();
+            Status = $"Applied {SelectedMedia.Title}. It will be restored after sign-in and wake.";
+        }
+        else
+        {
+            Status = $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
+        }
     }
 
     [RelayCommand]
     private void StopWallpaper()
     {
         RenderSupervisor.Instance.Stop();
+        var settings = LocalSettingsService.Load();
+        settings.AppliedWallpaperId = null;
+        settings.Save();
         Status = "Wallpaper stopped.";
     }
 

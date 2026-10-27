@@ -8,7 +8,7 @@
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
-        <StackPanel Spacing="22" MaxWidth="1300">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Spacing="22" MaxWidth="1300">
             <Grid>
                 <StackPanel Spacing="8">
                     <TextBlock Text="SYSTEM HEALTH" Style="{StaticResource PageEyebrowTextBlockStyle}" />
@@ -85,6 +85,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </StackPanel>
+        </StackPanel></ScrollViewer>
     </Grid>
 </Page>

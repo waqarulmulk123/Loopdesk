@@ -7,16 +7,20 @@ public sealed class TrayService : IDisposable
     private const uint CallbackMessage = 0x8001;
     private readonly IntPtr _hwnd;
     private readonly Action _open;
+    private readonly Action _stop;
+    private readonly Action _resume;
     private readonly Action _exit;
     private readonly SubclassProc _callback;
     private readonly uint _taskbarCreated = RegisterWindowMessage("TaskbarCreated");
     private bool _disposed;
     public bool IsAvailable { get; private set; }
 
-    public TrayService(IntPtr hwnd, Action open, Action exit)
+    public TrayService(IntPtr hwnd, Action open, Action stop, Action resume, Action exit)
     {
         _hwnd = hwnd;
         _open = open;
+        _stop = stop;
+        _resume = resume;
         _exit = exit;
         _callback = WindowProc;
         if (SetWindowSubclass(hwnd, _callback, 1, 0)) Add();
@@ -52,6 +56,10 @@ public sealed class TrayService : IDisposable
                 else if (mouseMessage == 0x0205 || mouseMessage == 0x007B) ShowMenu();
                 return IntPtr.Zero;
             }
+            if (!_disposed && message == 0x0218 && (wParam.ToUInt64() == 0x7 || wParam.ToUInt64() == 0x12))
+            {
+                _resume();
+            }
             if (message == 0x0082) Dispose();
         }
         catch (Exception exception)
@@ -79,7 +87,7 @@ public sealed class TrayService : IDisposable
         }
         finally { DestroyMenu(menu); }
         if (command == 1) _open();
-        else if (command == 2) RenderSupervisor.Instance.Stop();
+        else if (command == 2) _stop();
         else if (command == 3) _exit();
     }
 

@@ -8,9 +8,9 @@
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
-        <StackPanel Spacing="20">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Spacing="20">
             <Grid ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><StackPanel Spacing="8"><TextBlock Text="CONNECTED SCREENS" Style="{StaticResource PageEyebrowTextBlockStyle}" /><TextBlock Text="Displays" Style="{StaticResource PageTitleTextBlockStyle}" /><TextBlock Text="View the monitors detected by Windows." Style="{StaticResource PageSubtitleTextBlockStyle}" /></StackPanel><Button Grid.Column="1" Content="↻ Refresh displays" Style="{StaticResource HomeSecondaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.RefreshCommand}" /></Grid>
             <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="18" Padding="28"><StackPanel Spacing="20"><TextBlock Text="Monitor configuration" Style="{StaticResource SubtitleTextBlockStyle}" /><Border Background="{StaticResource PremiumSurfaceBrush}" CornerRadius="14" Padding="28" HorizontalAlignment="Stretch"><StackPanel Spacing="12" HorizontalAlignment="Center"><Border Width="360" Height="190" CornerRadius="10" BorderBrush="{StaticResource PremiumAccentBrush}" BorderThickness="3" Background="{StaticResource PremiumSurfaceBrush}"><StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"><TextBlock Text="PRIMARY DISPLAY" Style="{StaticResource PageEyebrowTextBlockStyle}" TextAlignment="Center" /><TextBlock Text="1" FontSize="42" FontWeight="SemiBold" HorizontalAlignment="Center" /><TextBlock Text="Windows display information" Opacity="0.68" /></StackPanel></Border><TextBlock Text="{x:Bind ViewModel.DisplaySummary, Mode=OneWay}" TextAlignment="Center" /></StackPanel></Border><InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="Per-monitor wallpaper assignment is not available yet" Message="The current renderer applies to the primary Windows desktop only. This page reports display detection without claiming assignments that are not active." /></StackPanel></Border>
-        </StackPanel>
+        </StackPanel></ScrollViewer>
     </Grid>
 </Page>

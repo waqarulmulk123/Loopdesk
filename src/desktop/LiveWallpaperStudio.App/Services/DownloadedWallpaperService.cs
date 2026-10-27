@@ -84,6 +84,12 @@ public sealed class DownloadedWallpaperService
         string temporaryPath = IndexPath + ".partial";
         File.WriteAllText(temporaryPath, JsonSerializer.Serialize(remaining, JsonOptions));
         File.Move(temporaryPath, IndexPath, overwrite: true);
+        var settings = LocalSettingsService.Load();
+        if (string.Equals(settings.AppliedWallpaperId, wallpaper.Id, StringComparison.Ordinal))
+        {
+            settings.AppliedWallpaperId = null;
+            settings.Save();
+        }
     }
 
     public void CleanupPlaybackCopies()

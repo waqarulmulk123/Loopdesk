@@ -8,7 +8,7 @@
                 <EntranceThemeTransition />
             </TransitionCollection>
         </Grid.Transitions>
-        <StackPanel Spacing="22" MaxWidth="1300">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Spacing="22" MaxWidth="1300">
             <StackPanel Spacing="8">
                 <TextBlock Text="THE APPLICATION" Style="{StaticResource PageEyebrowTextBlockStyle}" />
                 <TextBlock Text="About Loopdesk" Style="{StaticResource PageTitleTextBlockStyle}" />
@@ -46,6 +46,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </StackPanel>
+        </StackPanel></ScrollViewer>
     </Grid>
 </Page>

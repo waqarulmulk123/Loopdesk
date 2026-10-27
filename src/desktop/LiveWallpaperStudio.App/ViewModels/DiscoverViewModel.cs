@@ -187,9 +187,17 @@ public sealed partial class DiscoverViewModel : ObservableObject
         try
         {
             string playbackPath = DownloadedWallpaperService.Instance.CreatePlaybackCopy(wallpaper);
-            CatalogStatus = RenderSupervisor.Instance.Start(playbackPath)
-                ? $"Applied {SelectedItem.Title}."
-                : $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
+            if (RenderSupervisor.Instance.Start(playbackPath))
+            {
+                var settings = LocalSettingsService.Load();
+                settings.AppliedWallpaperId = wallpaper.Id;
+                settings.Save();
+                CatalogStatus = $"Applied {SelectedItem.Title}. It will be restored after sign-in and wake.";
+            }
+            else
+            {
+                CatalogStatus = $"Could not apply wallpaper: {RenderSupervisor.Instance.LastError ?? "unknown error"}";
+            }
         }
         catch (Exception)
         {

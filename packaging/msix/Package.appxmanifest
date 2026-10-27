@@ -4,8 +4,9 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap desktop rescap">
   <Identity Name="MWaqarUlMulk.Loopdesk" Publisher="CN=0F1F4D61-78EC-457E-A17A-38A9CE6AE7BB" Version="1.0.0.0" />
   <Properties>
     <DisplayName>Loopdesk</DisplayName>
@@ -21,6 +22,11 @@
   <Applications>
     <Application Id="App" Executable="LiveWallpaperStudio.App.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements DisplayName="Loopdesk" Description="Live wallpapers for Windows" BackgroundColor="transparent" Square150x150Logo="assets\Square150x150Logo.png" Square44x44Logo="assets\Square44x44Logo.png" />
+      <Extensions>
+        <desktop:Extension Category="windows.startupTask" Executable="LiveWallpaperStudio.App.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="LoopdeskStartup" Enabled="true" DisplayName="Loopdesk" />
+        </desktop:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>
