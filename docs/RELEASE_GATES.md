@@ -8,7 +8,7 @@ correctly on a customer's machine.
 
 | Gate | Evidence required | Owner | Current disposition |
 | --- | --- | --- | --- |
-| Content rights and confidentiality | Rights record for every distributed asset; no premium source video in public Git history | Product owner | Blocked: the current tree tracks 21 MP4 files, and 16 are labelled `premium: true` by the legacy seed data. |
+| Content rights and confidentiality | Rights record for every distributed asset; no premium source video in public Git history | Product owner | Repository remediation completed 2026-10-27: every reachable GitHub branch and the rewritten `main` tree contain zero MP4 files. The private object store remains the only media distribution path. Rights records are still an owner responsibility. |
 | Legal notices | A selected Loopdesk product licence and an up-to-date [NOTICE](../NOTICE.md) | Copyright owner | NOTICE index added; product licence is an owner decision. |
 | Reproducible package | Successful Windows workflow for the release commit, SHA-256 for each delivered file, and a retained workflow URL | Release manager | CI creates unsigned QA ZIP/MSIX artifacts only. |
 | Signing and publisher identity | Signing certificate or Store package identity, timestamped signature verification, and revocation plan | Publisher-account owner | Cannot be created from source control. |
@@ -17,27 +17,19 @@ correctly on a customer's machine.
 
 ## Public-media remediation
 
-The repository currently makes the tracked MP4s available to every Git clone.
-The legacy SQLite seed labels 16 of the 21 tracked MP4s as premium. Changing a
-row, removing a download route, or deleting files in a future commit does not
-remove them from existing Git history.
+Completed on 2026-10-27 with the product owner's authorization:
 
-This needs explicit owner authorization because it rewrites published history:
+1. A verified private Git bundle backup was created before rewriting history.
+2. `git filter-repo` removed every `*.mp4` path from repository history.
+3. The rewritten `main` was force-pushed with an explicit lease; stale
+   Dependabot branches that retained the old media snapshots were deleted.
+4. Verification confirmed one remote branch (`main`), zero MP4 entries in its
+   complete GitHub tree, zero tracked MP4s, and zero reachable MP4 objects
+   locally. The repository ignores future `*.mp4` additions.
 
-1. Inventory each media file, its copyright owner, licence, and intended
-   visibility; move distributable catalog objects to the appropriate R2
-   bucket, keeping premium originals in private storage.
-2. Make an immutable backup and notify all collaborators and downstream forks.
-3. Use an approved history-rewrite procedure (for example `git filter-repo`)
-   to remove the private source assets from every reachable ref; force-push
-   only after the owner approves the impact.
-4. Rotate any URLs, credentials, or other secrets that may have been present in
-   the same history; ask fork owners to delete old clones and forks where
-   possible.
-5. Run the tag release gate again. It intentionally rejects a tagged release
-   while MP4s are still tracked.
-
-No automated workflow can make files already cloned by another party private.
+Existing clones, forks, downloaded archives, and GitHub's internal retention
+window are outside source-control's control. Ask any collaborator or fork
+owner to delete old copies; keep all source media in private storage.
 
 ## Required physical Windows evidence
 
