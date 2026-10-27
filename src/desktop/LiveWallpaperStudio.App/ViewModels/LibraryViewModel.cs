@@ -105,10 +105,14 @@ public sealed partial class LibraryViewModel : ObservableObject
         try
         {
             string title = SelectedMedia.Title;
-            RenderSupervisor.Instance.Stop();
+            var settings = LocalSettingsService.Load();
+            bool isApplied = string.Equals(settings.AppliedWallpaperId, SelectedMedia.Id, StringComparison.Ordinal);
+            if (isApplied) RenderSupervisor.Instance.Stop();
             DownloadedWallpaperService.Instance.Remove(SelectedMedia);
             Refresh();
-            Status = $"Removed {title} from this device.";
+            Status = isApplied
+                ? $"Removed {title} and stopped its wallpaper."
+                : $"Removed {title} from this device.";
         }
         catch (Exception)
         {
