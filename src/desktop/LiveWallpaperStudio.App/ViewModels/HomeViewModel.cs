@@ -37,17 +37,18 @@ public sealed partial class HomeViewModel : ObservableObject
             {
                 string category = item.Categories?.FirstOrDefault() ?? "Uncategorized";
                 string resolution = item.Height is > 0 ? $"{item.Height}p" : "Resolution unavailable";
-                Items.Add(new HomeCatalogItem(item.Title, $"{category} · {resolution}", item.Premium ? "PREMIUM" : "FREE", PosterFor(item.Id)));
+                Items.Add(new HomeCatalogItem(item.Title, $"{category} · {resolution}", item.Premium ? "PREMIUM" : "FREE", OnlineCatalogService.PosterFor(item)));
             }
 
-            OnlineCatalogItem? featured = catalog.FirstOrDefault();
+            OnlineCatalogItem? featured = catalog.FirstOrDefault(item => item.Featured) ?? catalog.FirstOrDefault();
             if (featured is not null)
             {
                 FeaturedTitle = featured.Title;
                 FeaturedDescription = string.IsNullOrWhiteSpace(featured.Description)
                     ? "A curated motion wallpaper from the Loopdesk catalog."
                     : featured.Description;
-                FeaturedPosterUri = new Uri(PosterFor(featured.Id));
+                string poster = OnlineCatalogService.PosterFor(featured);
+                FeaturedPosterUri = string.IsNullOrEmpty(poster) ? null : new Uri(poster);
             }
         }
         catch
@@ -64,17 +65,6 @@ public sealed partial class HomeViewModel : ObservableObject
         _ => "Good night.",
     };
 
-    private static string PosterFor(string id)
-    {
-        string poster = id switch
-        {
-            "theme-loopdesk-aurora-dreamscape" => "media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp",
-            "theme-loopdesk-cosmic-infinity" => "media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp",
-            "theme-loopdesk-liquid-neon-flow" => "media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp",
-            _ => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp",
-        };
-        return $"ms-appx:///assets/wallpapers/posters/{poster}";
-    }
 }
 
 public sealed record HomeCatalogItem(string Title, string Subtitle, string Availability, string PosterUri);

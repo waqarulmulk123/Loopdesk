@@ -99,23 +99,10 @@ public sealed partial class DiscoverViewModel : ObservableObject
             {
                 string resolution = item.Width is > 0 && item.Height is > 0 ? $"{item.Width}×{item.Height}" : "Resolution unavailable";
                 CatalogItems.Add(new DiscoverItem(item.Id, item.Title, category, resolution, item.Premium,
-                    DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), PosterFor(item.Id)));
+                    DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), OnlineCatalogService.PosterFor(item)));
             }
         }
         SelectedItem = CatalogItems.FirstOrDefault(item => item.Id == previousSelection) ?? CatalogItems.FirstOrDefault();
-    }
-
-    private static string PosterFor(string id)
-    {
-        string poster = id switch
-        {
-            "theme-loopdesk-aurora-dreamscape" => "media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp",
-            "theme-loopdesk-cosmic-infinity" => "media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp",
-            "theme-loopdesk-liquid-neon-flow" => "media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp",
-            "theme-loopdesk-bioluminescent-ocean" => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp",
-            _ => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp"
-        };
-        return $"ms-appx:///assets/wallpapers/posters/{poster}";
     }
 
     [RelayCommand]

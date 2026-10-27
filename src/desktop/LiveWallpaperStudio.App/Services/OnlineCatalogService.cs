@@ -9,6 +9,24 @@ public sealed class OnlineCatalogService
 
     public OnlineCatalogService(HttpClient? http = null) => _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 
+    public static string PosterFor(OnlineCatalogItem item)
+    {
+        if (Uri.TryCreate(item.ThumbnailUrl, UriKind.Absolute, out Uri? thumbnail) &&
+            thumbnail.Scheme == Uri.UriSchemeHttps &&
+            thumbnail.Host.Equals(new Uri(LocalSettingsService.ProductionApiBaseUrl).Host, StringComparison.OrdinalIgnoreCase))
+            return thumbnail.ToString();
+
+        string? poster = item.Id switch
+        {
+            "theme-loopdesk-aurora-dreamscape" => "media-generation-poster-aurora-mountains-0-b0747490-fea4-40da-b98a-3c4202fe903d.webp",
+            "theme-loopdesk-cosmic-infinity" => "media-generation-poster-galaxy-nebula-0-bf04bf8b-9f6b-4e6a-aeab-ebed4775e506.webp",
+            "theme-loopdesk-liquid-neon-flow" => "media-generation-poster-neon-cyberpunk-city-0-4ddfb59d-0306-4ffe-9660-3c4a776e127d.webp",
+            "theme-loopdesk-bioluminescent-ocean" => "media-generation-poster-glass-ocean-0-78a639e5-b813-4024-95cc-0b8e1ac9f802.webp",
+            _ => null,
+        };
+        return poster is null ? string.Empty : $"ms-appx:///assets/wallpapers/posters/{poster}";
+    }
+
     public async Task<IReadOnlyList<OnlineCatalogItem>> LoadAsync(string baseUrl, CancellationToken cancellationToken = default)
     {
         if (!Uri.TryCreate(baseUrl.TrimEnd('/') + "/", UriKind.Absolute, out var baseUri) || baseUri.Scheme != Uri.UriSchemeHttps)
@@ -83,7 +101,9 @@ public sealed record OnlineCatalogItem(
     [property: JsonPropertyName("created_at")] string CreatedAt,
     List<string>? Categories = null,
     int? Width = null,
-    int? Height = null);
+    int? Height = null,
+    string? ThumbnailUrl = null,
+    bool Featured = false);
 
 public sealed record OnlineVariant(
     string Id,

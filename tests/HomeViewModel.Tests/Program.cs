@@ -22,11 +22,12 @@ Check(offline.FeaturedPosterUri is null, "Offline catalog remains safe to render
 OnlineCatalogService.Response = new();
 var populated = new HomeViewModel();
 OnlineCatalogService.Response.SetResult([
-    new("theme-loopdesk-aurora-dreamscape", "Aurora", "Cloud wallpaper", ["Nature"], 1080, false)
+    new("theme-loopdesk-aurora-dreamscape", "Aurora", "Cloud wallpaper", ["Nature"], 1080, false),
+    new("theme-loopdesk-cosmic-infinity", "Cosmic", "Featured cloud wallpaper", ["Space"], 1080, false, Featured: true)
 ]);
-Check(populated.FeaturedTitle == "Aurora", "Catalog supplies the featured title");
+Check(populated.FeaturedTitle == "Cosmic", "Catalog supplies the featured title");
 Check(populated.FeaturedPosterUri is { IsAbsoluteUri: true }, "Loaded hero exposes a typed absolute image URI");
-Check(populated.Items.Count == 1, "Catalog supplies collection cards");
+Check(populated.Items.Count == 2, "Catalog supplies collection cards");
 
 namespace LiveWallpaperStudio.App.Services
 {
@@ -34,7 +35,8 @@ namespace LiveWallpaperStudio.App.Services
     {
         public static TaskCompletionSource<IReadOnlyList<OnlineCatalogItem>> Response { get; set; } = new();
         public Task<IReadOnlyList<OnlineCatalogItem>> LoadAsync(string _) => Response.Task;
+        public static string PosterFor(OnlineCatalogItem item) => "https://example.invalid/v1/wallpapers/" + item.Id + "/thumbnail";
     }
     public static class LocalSettingsService { public const string ProductionApiBaseUrl = "https://example.invalid"; }
-    public sealed record OnlineCatalogItem(string Id, string Title, string? Description, string[]? Categories, int? Height, bool Premium);
+    public sealed record OnlineCatalogItem(string Id, string Title, string? Description, string[]? Categories, int? Height, bool Premium, bool Featured = false);
 }
