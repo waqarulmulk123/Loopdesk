@@ -15,10 +15,16 @@ export type WallpaperRow = {
   kind: string;
   visibility: string;
   premium: boolean;
+  featured: boolean;
+  thumbnail_key: string | null;
   created_at: string;
   categories: string[];
   width: number | null;
   height: number | null;
+};
+
+export type PublicWallpaper = Omit<WallpaperRow, 'thumbnail_key'> & {
+  thumbnailUrl: string | null;
 };
 
 export type WallpaperPage = {
@@ -50,13 +56,23 @@ export function decodeCursor(value: string | undefined): Cursor | null | undefin
   }
 }
 
+export function toPublicWallpaper(row: WallpaperRow, origin: string): PublicWallpaper {
+  const { thumbnail_key: _thumbnailKey, ...item } = row;
+  return {
+    ...item,
+    thumbnailUrl: row.thumbnail_key ? `${origin}/v1/wallpapers/${encodeURIComponent(row.id)}/thumbnail` : null,
+  };
+}
+
 function wallpaper(row: Record<string, unknown>): WallpaperRow {
   const categoryNames = typeof row.category_names === 'string' && row.category_names.length > 0
     ? row.category_names.split('|')
     : [];
   return {
     id: String(row.id), title: String(row.title), description: row.description as string | null,
-    kind: String(row.kind), visibility: String(row.visibility), premium: Boolean(row.premium),
+    kind: String(row.kind), visibility: String(row.visibility), premium: Number(row.premium) === 1,
+    featured: Number(row.featured) === 1,
+    thumbnail_key: typeof row.thumbnail_key === 'string' ? row.thumbnail_key : null,
     created_at: String(row.created_at), categories: categoryNames,
     width: typeof row.width === 'number' ? row.width : null,
     height: typeof row.height === 'number' ? row.height : null,
@@ -65,7 +81,7 @@ function wallpaper(row: Record<string, unknown>): WallpaperRow {
 
 export async function listWallpapers(db: Db, limit: number, category?: string, cursor?: Cursor): Promise<WallpaperPage | null> {
   if (!db) return null;
-  const columns = `w.id, w.title, w.description, w.kind, w.visibility, w.premium, w.created_at,
+  const columns = `w.id, w.title, w.description, w.kind, w.visibility, w.premium, w.featured, w.thumbnail_key, w.created_at,
     COALESCE((SELECT group_concat(c.display_name, '|') FROM wallpaper_categories wc JOIN categories c ON c.id = wc.category_id WHERE wc.wallpaper_id = w.id), '') AS category_names,
     (SELECT mv.width FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS width,
     (SELECT mv.height FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS height`;
@@ -87,7 +103,11 @@ export async function listWallpapers(db: Db, limit: number, category?: string, c
 
 export async function getWallpaper(db: Db, id: string): Promise<WallpaperRow | null> {
   if (!db) return null;
-  const row = await db.prepare("SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE id = ? AND visibility = 'published'").bind(id).first<Record<string, unknown>>();
+  const row = await db.prepare(`SELECT w.id, w.title, w.description, w.kind, w.visibility, w.premium, w.featured, w.thumbnail_key, w.created_at,
+    COALESCE((SELECT group_concat(c.display_name, '|') FROM wallpaper_categories wc JOIN categories c ON c.id = wc.category_id WHERE wc.wallpaper_id = w.id), '') AS category_names,
+    (SELECT mv.width FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS width,
+    (SELECT mv.height FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS height
+    FROM wallpapers w WHERE w.id = ? AND w.visibility = 'published'`).bind(id).first<Record<string, unknown>>();
   return row ? wallpaper(row) : null;
 }
 
@@ -100,8 +120,11 @@ export async function listCategories(db: Db): Promise<{ id: string; slug: string
 export async function searchWallpapers(db: Db, q: string, limit: number, cursor?: Cursor): Promise<WallpaperPage | null> {
   if (!db) return null;
   const escaped = q.replace(/[\\%_]/g, character => `\\${character}`);
-  const cursorClause = cursor ? ' AND (created_at < ? OR (created_at = ? AND id < ?))' : '';
-  const result = await db.prepare(`SELECT id, title, description, kind, visibility, premium, created_at FROM wallpapers WHERE visibility = 'published' AND title LIKE ? ESCAPE '\\'${cursorClause} ORDER BY created_at DESC, id DESC LIMIT ?`)
+  const result = await db.prepare(`SELECT w.id, w.title, w.description, w.kind, w.visibility, w.premium, w.featured, w.thumbnail_key, w.created_at,
+    COALESCE((SELECT group_concat(c.display_name, '|') FROM wallpaper_categories wc JOIN categories c ON c.id = wc.category_id WHERE wc.wallpaper_id = w.id), '') AS category_names,
+    (SELECT mv.width FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS width,
+    (SELECT mv.height FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS height
+    FROM wallpapers w WHERE w.visibility = 'published' AND w.title LIKE ? ESCAPE '\\'${cursor ? ' AND (w.created_at < ? OR (w.created_at = ? AND w.id < ?))' : ''} ORDER BY w.created_at DESC, w.id DESC LIMIT ?`)
     .bind(`%${escaped}%`, ...(cursor ? [cursor.createdAt, cursor.createdAt, cursor.id] : []), limit + 1)
     .all<Record<string, unknown>>();
   const rows = result.results.map(wallpaper);
@@ -109,4 +132,17 @@ export async function searchWallpapers(db: Db, q: string, limit: number, cursor?
   const items = hasMore ? rows.slice(0, limit) : rows;
   const last = items.at(-1);
   return { items, nextCursor: hasMore && last ? encodeCursor(last.created_at, last.id) : null };
+}
+
+export async function listAdminWallpapers(db: Db, visibility: string | undefined, limit: number): Promise<WallpaperRow[] | null> {
+  if (!db) return null;
+  const columns = `w.id, w.title, w.description, w.kind, w.visibility, w.premium, w.featured, w.thumbnail_key, w.created_at,
+    COALESCE((SELECT group_concat(c.display_name, '|') FROM wallpaper_categories wc JOIN categories c ON c.id = wc.category_id WHERE wc.wallpaper_id = w.id), '') AS category_names,
+    (SELECT mv.width FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS width,
+    (SELECT mv.height FROM media_variants mv WHERE mv.wallpaper_id = w.id AND mv.processing_state = 'ready' AND mv.mime_type = 'video/mp4' AND mv.codec = 'h264' ORDER BY mv.width * mv.height DESC LIMIT 1) AS height`;
+  const query = visibility
+    ? `SELECT ${columns} FROM wallpapers w WHERE w.visibility = ? ORDER BY w.updated_at DESC, w.id DESC LIMIT ?`
+    : `SELECT ${columns} FROM wallpapers w ORDER BY w.updated_at DESC, w.id DESC LIMIT ?`;
+  const result = await db.prepare(query).bind(...(visibility ? [visibility, limit] : [limit])).all<Record<string, unknown>>();
+  return result.results.map(wallpaper);
 }

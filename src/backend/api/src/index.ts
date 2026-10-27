@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { adminRoutes } from './admin.js';
-import { createDb, decodeCursor, listWallpapers, getWallpaper, listCategories, searchWallpapers, type DatabaseBindings } from './db.js';
+import { createDb, decodeCursor, listWallpapers, getWallpaper, listCategories, searchWallpapers, toPublicWallpaper, type DatabaseBindings } from './db.js';
 
 // Cloudflare Workers API, spec section 11.
 // Real D1 catalog queries are used when the DB binding is configured.
@@ -86,7 +86,8 @@ app.get('/v1/wallpapers', async (c) => {
   const db = createDb(c.env);
   const page = await listWallpapers(db, limit, c.req.query('category'), cursor);
   c.header('cache-control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
-  return c.json({ items: page?.items ?? [], nextCursor: page?.nextCursor ?? null, limit, catalogVersion: null });
+  const origin = new URL(c.req.url).origin;
+  return c.json({ items: page?.items.map(item => toPublicWallpaper(item, origin)) ?? [], nextCursor: page?.nextCursor ?? null, limit, catalogVersion: null });
 });
 
 app.get('/v1/wallpapers/:id', async (c) => {
@@ -100,7 +101,21 @@ app.get('/v1/wallpapers/:id', async (c) => {
      FROM media_variants WHERE wallpaper_id = ? AND processing_state = 'ready'
      ORDER BY width DESC, height DESC`,
   ).bind(item.id).all();
-  return c.json({ item, variants: variants?.results ?? [] });
+  return c.json({ item: toPublicWallpaper(item, new URL(c.req.url).origin), variants: variants?.results ?? [] });
+});
+
+app.get('/v1/wallpapers/:id/thumbnail', async (c) => {
+  const db = createDb(c.env);
+  if (!db || !c.env.R2_PUBLISHED) return c.json({ error: { code: 'not_configured', message: 'Thumbnail delivery is not configured.' } }, 501);
+  const wallpaper = await db.prepare("SELECT thumbnail_key FROM wallpapers WHERE id = ? AND visibility = 'published'")
+    .bind(c.req.param('id')).first<{ thumbnail_key: string | null }>();
+  if (!wallpaper?.thumbnail_key) return c.json({ error: { code: 'not_found', message: 'Wallpaper thumbnail not found.' } }, 404);
+  const object = await c.env.R2_PUBLISHED.get(wallpaper.thumbnail_key);
+  if (!object) return c.json({ error: { code: 'not_found', message: 'Wallpaper thumbnail not found.' } }, 404);
+  const headers = new Headers({ 'cache-control': 'public, max-age=300, s-maxage=3600', etag: object.httpEtag });
+  object.writeHttpMetadata(headers);
+  if (!headers.has('content-type')) headers.set('content-type', 'image/webp');
+  return new Response(object.body, { headers });
 });
 
 app.get('/v1/categories', async (c) => {
@@ -121,7 +136,8 @@ app.get('/v1/search', async (c) => {
   const db = createDb(c.env);
   const page = await searchWallpapers(db, q, limit, cursor);
   c.header('cache-control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
-  return c.json({ items: page?.items ?? [], nextCursor: page?.nextCursor ?? null });
+  const origin = new URL(c.req.url).origin;
+  return c.json({ items: page?.items.map(item => toPublicWallpaper(item, origin)) ?? [], nextCursor: page?.nextCursor ?? null });
 });
 
 app.post('/v1/assets/:variantId/authorize-download', async (c) => {

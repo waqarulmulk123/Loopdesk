@@ -56,7 +56,7 @@ test('wallpaper detail uses D1-compatible placeholders for variant lookup', asyn
   const { db, prepared } = d1ForWallpaperDetail();
   const response = await app.fetch(new Request('https://api.test/v1/wallpapers/aurora'), { DB: db });
   assert.equal(response.status, 200);
-  const variants = prepared.find(({ sql }) => sql.includes('FROM media_variants'));
+  const variants = prepared.find(({ sql }) => sql.includes('FROM media_variants WHERE wallpaper_id = ?'));
   assert.ok(variants);
   assert.ok(variants.sql.includes('wallpaper_id = ?'));
   assert.deepEqual(variants.values, ['aurora']);
@@ -110,6 +110,53 @@ test('catalog returns a continuation cursor only when another row exists', async
 
   await app.fetch(new Request(`https://api.test/v1/wallpapers?limit=1&cursor=${encodeURIComponent(firstPage.nextCursor)}`), { DB: db });
   assert.deepEqual(queries[1].values, ['2026-10-26T12:00:00Z', '2026-10-26T12:00:00Z', 'newer', 2]);
+});
+
+test('catalog exposes featured thumbnail URLs without exposing private R2 keys', async () => {
+  const db = {
+    prepare() {
+      return {
+        bind() { return this; },
+        async all() {
+          return { results: [{
+            id: 'aurora', title: 'Aurora', description: '', kind: 'video', visibility: 'published', premium: 0,
+            featured: 1, thumbnail_key: 'thumbnails/aurora.webp', created_at: '2026-10-26T12:00:00Z', category_names: '',
+          }] };
+        },
+      };
+    },
+  } as unknown as D1Database;
+  const response = await app.fetch(new Request('https://api.test/v1/wallpapers?limit=1'), { DB: db });
+  const payload = await response.json<{ items: Array<{ featured: boolean; thumbnailUrl: string | null; thumbnail_key?: string }> }>();
+  assert.equal(payload.items[0].featured, true);
+  assert.equal(payload.items[0].thumbnailUrl, 'https://api.test/v1/wallpapers/aurora/thumbnail');
+  assert.equal('thumbnail_key' in payload.items[0], false);
+});
+
+test('thumbnail delivery only fetches a published wallpaper thumbnail', async () => {
+  const db = {
+    prepare() {
+      return {
+        bind() { return this; },
+        async first() { return { thumbnail_key: 'thumbnails/aurora.webp' }; },
+      };
+    },
+  } as unknown as D1Database;
+  const bucket = {
+    async get(key: string) {
+      assert.equal(key, 'thumbnails/aurora.webp');
+      return {
+        body: new ReadableStream({ start(controller) { controller.enqueue(new TextEncoder().encode('image')); controller.close(); } }),
+        httpEtag: 'thumbnail-etag',
+        writeHttpMetadata(headers: Headers) { headers.set('content-type', 'image/webp'); },
+      };
+    },
+  } as unknown as R2Bucket;
+  const response = await app.fetch(new Request('https://api.test/v1/wallpapers/aurora/thumbnail'), { DB: db, R2_PUBLISHED: bucket });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('content-type'), 'image/webp');
+  assert.match(response.headers.get('cache-control') ?? '', /s-maxage=3600/);
+  assert.equal(await response.text(), 'image');
 });
 
 test('asset delivery reports missing R2 binding instead of returning an object key', async () => {
@@ -198,6 +245,59 @@ test('admin routes are mounted and reject requests without a configured token', 
   const response = await app.fetch(new Request('https://api.test/v1/admin/uploads/init', { method: 'POST' }), { DB: {} as D1Database });
   assert.equal(response.status, 503);
   assert.deepEqual(await response.json(), { error: { code: 'not_configured', message: 'Admin authentication is not configured.' } });
+});
+
+test('admin can list drafts and update catalog metadata with an audit record', async () => {
+  const audits: unknown[][] = [];
+  const db = {
+    prepare(sql: string) {
+      return {
+        bind(...values: unknown[]) {
+          if (sql.includes('admin_audit_log')) audits.push(values);
+          return this;
+        },
+        async all() {
+          return { results: [{ id: 'draft-1', title: 'Draft', description: '', kind: 'video', visibility: 'draft', premium: 0, featured: 0, thumbnail_key: null, created_at: '2026-10-26', category_names: '' }] };
+        },
+        async first() {
+          if (sql.startsWith('UPDATE wallpapers')) return { id: 'draft-1', title: 'Renamed', description: '', kind: 'video', visibility: 'draft', premium: 0, featured: 1, thumbnail_key: null, created_at: '2026-10-26', updated_at: '2026-10-27' };
+          return null;
+        },
+        async run() { return { success: true }; },
+      };
+    },
+  } as unknown as D1Database;
+  const env = { DB: db, ADMIN_API_TOKEN: 'test-token' };
+  const listed = await app.fetch(new Request('https://api.test/v1/admin/wallpapers?visibility=draft', { headers: { authorization: 'Bearer test-token' } }), env);
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json<{ items: Array<{ id: string }> }>()).items[0].id, 'draft-1');
+  const updated = await app.fetch(new Request('https://api.test/v1/admin/wallpapers/draft-1', {
+    method: 'PATCH', headers: { authorization: 'Bearer test-token', 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Renamed', featured: true }),
+  }), env);
+  assert.equal(updated.status, 200);
+  assert.equal(audits.length, 1);
+  assert.equal(audits[0][1], 'wallpaper.updated');
+});
+
+test('admin deletion hides media first and attempts published-object cleanup', async () => {
+  const deleted: string[] = [];
+  const db = {
+    prepare(sql: string) {
+      return {
+        bind() { return this; },
+        async first() { return sql.includes('SELECT id, thumbnail_key') ? { id: 'wallpaper-1', thumbnail_key: 'thumbnails/test.webp' } : null; },
+        async all() { return { results: [{ object_key: 'published/test.mp4' }] }; },
+      };
+    },
+    async batch() { return []; },
+  } as unknown as D1Database;
+  const bucket = { async delete(key: string) { deleted.push(key); } } as unknown as R2Bucket;
+  const response = await app.fetch(new Request('https://api.test/v1/admin/wallpapers/wallpaper-1', { method: 'DELETE', headers: { authorization: 'Bearer test-token' } }), {
+    DB: db, R2_PUBLISHED: bucket, ADMIN_API_TOKEN: 'test-token',
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(deleted.sort(), ['published/test.mp4', 'thumbnails/test.webp']);
+  assert.deepEqual(await response.json(), { deleted: true, cleanupPending: false });
 });
 
 test('admin upload rejects media whose SHA-256 does not match initialization', async () => {
