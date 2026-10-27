@@ -10,6 +10,7 @@
     <FileVersion>1.0.0.0</FileVersion>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <SelfContained>true</SelfContained>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>

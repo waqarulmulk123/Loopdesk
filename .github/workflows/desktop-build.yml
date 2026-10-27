@@ -49,7 +49,7 @@ jobs:
         shell: pwsh
         run: |
           $publish = "artifacts\desktop\win-x64"
-          dotnet publish src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -r win-x64 --self-contained false -p:Platform=x64 -o $publish
+          dotnet publish src/desktop/LiveWallpaperStudio.App/LiveWallpaperStudio.App.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o $publish
           Copy-Item .\build\renderer\Release\lws-renderer.exe -Destination $publish -Force
           Compress-Archive -Path "$publish\*" -DestinationPath "artifacts\LiveWallpaperStudio-win-x64-unsigned.zip" -Force
 

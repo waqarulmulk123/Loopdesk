@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 
 .\scripts\build-desktop.ps1
 $publish = Join-Path (Get-Location) "artifacts\desktop\win-x64"
-dotnet publish src\desktop\LiveWallpaperStudio.App\LiveWallpaperStudio.App.csproj -c Release -r win-x64 --self-contained false -o $publish
+dotnet publish src\desktop\LiveWallpaperStudio.App\LiveWallpaperStudio.App.csproj -c Release -r win-x64 --self-contained true -o $publish
 $renderer = Get-ChildItem -Path "build\renderer" -Recurse -Filter "lws-renderer.exe" | Select-Object -First 1 -ExpandProperty FullName
 if (-not $renderer) { throw "Renderer executable was not found after build." }
 Copy-Item $renderer -Destination $publish -Force
