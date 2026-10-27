@@ -25,6 +25,8 @@ public sealed partial class DiscoverViewModel : ObservableObject
     private DiscoverItem? _selectedItem;
 
     public ObservableCollection<DiscoverItem> CatalogItems { get; } = new();
+    public ObservableCollection<string> Categories { get; } = ["All"];
+    public string SelectedTitle => SelectedItem?.Title ?? "Choose a wallpaper";
 
     private List<OnlineCatalogItem> _allItems = new();
 
@@ -42,11 +44,13 @@ public sealed partial class DiscoverViewModel : ObservableObject
         try
         {
             _allItems = (await _onlineCatalog.LoadAsync(apiBaseUrl)).ToList();
+            SetCategories();
             CatalogStatus = $"Cloud catalog: {_allItems.Count} item(s) available.";
         }
         catch (Exception)
         {
             _allItems = [];
+            SetCategories();
             CatalogStatus = "Cloud catalog is temporarily unavailable. Please try again.";
         }
         ApplySearch();
@@ -66,8 +70,20 @@ public sealed partial class DiscoverViewModel : ObservableObject
 
     partial void OnSelectedCategoryChanged(string value) => ApplySearch();
 
+    partial void OnSelectedItemChanged(DiscoverItem? value) => OnPropertyChanged(nameof(SelectedTitle));
+
+    private void SetCategories()
+    {
+        Categories.Clear();
+        Categories.Add("All");
+        foreach (string category in _allItems.SelectMany(item => item.Categories ?? []).Distinct(StringComparer.OrdinalIgnoreCase).Order())
+            Categories.Add(category);
+        if (!Categories.Contains(SelectedCategory, StringComparer.OrdinalIgnoreCase)) SelectedCategory = "All";
+    }
+
     private void ApplySearch()
     {
+        string? previousSelection = SelectedItem?.Id;
         CatalogItems.Clear();
         string query = SearchText.Trim();
         foreach (var item in _allItems)
@@ -86,8 +102,7 @@ public sealed partial class DiscoverViewModel : ObservableObject
                     DownloadedWallpaperService.Instance.List().Any(download => download.Id == item.Id), PosterFor(item.Id)));
             }
         }
-        if (SelectedItem is null && CatalogItems.Count > 0)
-            SelectedItem = CatalogItems[0];
+        SelectedItem = CatalogItems.FirstOrDefault(item => item.Id == previousSelection) ?? CatalogItems.FirstOrDefault();
     }
 
     private static string PosterFor(string id)
@@ -110,6 +125,11 @@ public sealed partial class DiscoverViewModel : ObservableObject
         if (selected is null)
         {
             CatalogStatus = "Select a wallpaper to download.";
+            return;
+        }
+        if (selected.IsDownloaded)
+        {
+            CatalogStatus = $"{selected.Title} is already in your protected Loopdesk vault. Apply it or find it in My wallpapers.";
             return;
         }
         string? finalPath = null;

@@ -30,10 +30,7 @@
                 <Button Grid.Column="1" Content="Search" Style="{StaticResource HomePrimaryButtonStyle}" Command="{x:Bind ViewModel.SearchCommand}" />
             </Grid>
             <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Button Content="All" Style="{StaticResource HomePrimaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="All" />
-                    <Button Content="Loopdesk Originals" Style="{StaticResource HomeSecondaryButtonStyle}" Padding="16,7" Command="{x:Bind ViewModel.SelectCategoryCommand}" CommandParameter="Loopdesk Originals" />
-                </StackPanel>
+                <StackPanel x:Name="CategoryButtons" Orientation="Horizontal" Spacing="10" />
             </ScrollViewer>
         </StackPanel>
 
@@ -42,7 +39,6 @@
                   ItemsSource="{x:Bind ViewModel.CatalogItems, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
                   SelectionMode="Single"
-                  IsItemClickEnabled="True"
                   ShowsScrollingPlaceholders="True">
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -70,9 +66,7 @@
                                         <TextBlock Text="{Binding Availability}" Foreground="#FF6DF7DF" FontSize="10" FontWeight="SemiBold" />
                                     </Border>
                                 </StackPanel>
-                                <Border Width="42" Height="30" Background="#FF334C79" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                                    <TextBlock Text="•••" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
-                                </Border>
+                                <Button Width="42" Height="30" Background="#FF334C79" BorderThickness="0" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTipService.ToolTip="Select wallpaper" Click="CardAction_Click">•••</Button>
                             </Grid>
                         </Grid>
                     </Border>
@@ -87,7 +81,7 @@
             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <StackPanel Spacing="3">
                 <TextBlock Text="Selected wallpaper" FontSize="20" FontWeight="SemiBold" />
-                <TextBlock Text="{x:Bind ViewModel.SelectedItem.Title, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{x:Bind ViewModel.SelectedTitle, Mode=OneWay}" Foreground="{StaticResource PremiumTextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
             </StackPanel>
             <ScrollViewer Grid.Column="1" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
