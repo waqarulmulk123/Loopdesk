@@ -3,19 +3,15 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid Padding="46,34,46,26" Background="{StaticResource ShellBackgroundBrush}">
-        <Grid.Transitions>
-            <TransitionCollection>
-                <EntranceThemeTransition />
-            </TransitionCollection>
-        </Grid.Transitions>
-        <ScrollViewer>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="20">
                 <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="Keep your wallpaper running" Message="Closing the window keeps Loopdesk in the notification area. Use its tray icon to reopen the app, stop the wallpaper, or exit Loopdesk." />
                 <StackPanel Spacing="8"><TextBlock Text="PREFERENCES" Style="{StaticResource PageEyebrowTextBlockStyle}" /><TextBlock Text="Settings" Style="{StaticResource PageTitleTextBlockStyle}" /><TextBlock Text="Review current playback and privacy behavior." Style="{StaticResource PageSubtitleTextBlockStyle}" /></StackPanel>
                 <Grid ColumnSpacing="20"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                    <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20"><StackPanel Spacing="10"><TextBlock Text="Playback &amp; performance" Style="{StaticResource SubtitleTextBlockStyle}" /><TextBlock Text="Wallpapers start muted." FontWeight="SemiBold" /><TextBlock Text="Pause and performance controls are not exposed until the native renderer can apply them. The current renderer targets the primary desktop." Opacity="0.68" TextWrapping="Wrap" /></StackPanel></Border>
+                    <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20"><StackPanel Spacing="10"><TextBlock Text="Start with Windows" Style="{StaticResource SubtitleTextBlockStyle}" /><ToggleSwitch x:Name="StartupToggle" Header="Restore my wallpaper after I sign in" Toggled="StartupToggle_Toggled" /><TextBlock Text="{x:Bind ViewModel.StartupStatus, Mode=OneWay}" Opacity="0.68" TextWrapping="Wrap" /></StackPanel></Border>
                     <Border Grid.Column="1" Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20"><StackPanel Spacing="10"><TextBlock Text="Privacy &amp; connection" Style="{StaticResource SubtitleTextBlockStyle}" /><TextBlock Text="No usage analytics or crash reports are sent." FontWeight="SemiBold" /><TextBlock Text="The catalog uses a managed HTTPS endpoint. Loopdesk does not scan arbitrary local folders or display user file paths in the catalog." Opacity="0.68" TextWrapping="Wrap" /></StackPanel></Border>
                 </Grid>
+                <Border Background="{StaticResource PremiumCardBrush}" CornerRadius="16" Padding="20"><StackPanel Spacing="10"><TextBlock Text="Playback" Style="{StaticResource SubtitleTextBlockStyle}" /><TextBlock Text="Wallpapers play muted and are restored only after you apply a protected cloud download." FontWeight="SemiBold" /><TextBlock Text="Per-monitor assignment and renderer pause controls remain unavailable until the native renderer supports them; Loopdesk does not present inactive controls as settings." Opacity="0.68" TextWrapping="Wrap" /></StackPanel></Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>
